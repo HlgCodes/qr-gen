@@ -44,6 +44,13 @@
   .swatch { height: 2.75rem; width: 2.75rem; flex: none; cursor: pointer; border-radius: .875rem; border: 1px solid #e5e7eb; background: #fff; padding: 2px; }
   .theme-btn { transition: all .15s ease; }
   .theme-btn:hover { border-color: #93c5fd; }
+
+  /* cursor de escritura en los mockups de chat */
+  .caret {
+    display: inline-block; width: 1px; height: 1em; flex: none;
+    background: #2563eb; animation: caret-blink 1.1s steps(1) infinite;
+  }
+  @keyframes caret-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 </style>
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900">
@@ -652,16 +659,18 @@
         const cc = val('wa-cc') || '+57';
         const num = val('wa-num') || '300 123 4567';
         const msg = val('wa-msg') || 'Hola, quiero información';
+        // el mensaje aun no se ha enviado: se muestra escrito en el campo
         return phoneShell(
           '<div class="flex items-center gap-2 bg-[#075e54] px-3 py-2 text-white">' +
             '<div class="grid h-7 w-7 flex-none place-items-center rounded-full bg-white/25 text-[10px] font-bold">' + esc(iniciales(num)) + '</div>' +
             '<div class="min-w-0 leading-tight"><p class="truncate text-[10px] font-semibold">' + esc(cc + ' ' + num) + '</p><p class="text-[8px] text-white/70">en línea</p></div>' +
           '</div>' +
-          '<div class="flex-1 space-y-2 overflow-hidden bg-[#ece5dd] p-2.5">' +
-            '<div class="ml-auto w-fit max-w-[88%] break-words rounded-lg rounded-tr-sm bg-[#dcf8c6] px-2.5 py-1.5 text-[10px] leading-snug text-gray-800 shadow-sm">' + esc(msg) + '</div>' +
-          '</div>' +
-          '<div class="flex items-center gap-1.5 bg-[#f0f0f0] p-1.5">' +
-            '<div class="flex-1 rounded-full bg-white px-3 py-1.5 text-[9px] text-gray-400">Escribe un mensaje</div>' +
+          '<div class="flex-1 overflow-hidden bg-[#ece5dd] p-2.5"></div>' +
+          '<div class="flex items-end gap-1.5 bg-[#f0f0f0] p-1.5">' +
+            '<div class="flex max-h-[58px] min-w-0 flex-1 items-start gap-1 overflow-hidden rounded-2xl bg-white px-3 py-1.5 text-[9px] leading-snug text-gray-800">' +
+              '<span class="min-w-0 break-words">' + esc(msg) + '</span>' +
+              '<span class="caret mt-[1px]"></span>' +
+            '</div>' +
             '<div class="grid h-6 w-6 flex-none place-items-center rounded-full bg-[#25d366] text-[9px] text-white">➤</div>' +
           '</div>');
       }
@@ -733,15 +742,20 @@
       case 'sms': {
         const num = val('sms-num') || '+57 300 123 4567';
         const body = val('sms-body') || 'Tu mensaje aquí';
+        // igual que WhatsApp: el texto va escrito, sin burbuja enviada
         return phoneShell(
           '<div class="flex items-center gap-2 bg-gray-800 px-3 py-2 text-white">' +
             '<div class="grid h-7 w-7 flex-none place-items-center rounded-full bg-white/25 text-[10px] font-bold">' + esc(iniciales(num)) + '</div>' +
             '<p class="truncate text-[10px] font-semibold">' + esc(num) + '</p>' +
           '</div>' +
-          '<div class="flex-1 space-y-2 overflow-hidden bg-[#f2f2f2] p-2.5">' +
-            '<div class="ml-auto w-fit max-w-[88%] break-words rounded-lg rounded-tr-sm bg-white px-2.5 py-1.5 text-[10px] leading-snug text-gray-800 shadow-sm">' + esc(body) + '</div>' +
-          '</div>' +
-          '<div class="bg-white p-1.5"><div class="rounded-full bg-gray-100 px-3 py-1.5 text-[9px] text-gray-400">Escribe un SMS…</div></div>');
+          '<div class="flex-1 overflow-hidden bg-[#f2f2f2] p-2.5"></div>' +
+          '<div class="flex items-end gap-1.5 border-t border-gray-200 bg-white p-1.5">' +
+            '<div class="flex max-h-[58px] min-w-0 flex-1 items-start gap-1 overflow-hidden rounded-2xl bg-gray-100 px-3 py-1.5 text-[9px] leading-snug text-gray-800">' +
+              '<span class="min-w-0 break-words">' + esc(body) + '</span>' +
+              '<span class="caret mt-[1px]"></span>' +
+            '</div>' +
+            '<div class="grid h-6 w-6 flex-none place-items-center rounded-full bg-blue-500 text-[9px] text-white">↑</div>' +
+          '</div>');
       }
       case 'geo': {
         const lat = val('geo-lat') || '4.7110';
