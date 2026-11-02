@@ -270,33 +270,62 @@ func renderQR(p QRParams) ([]byte, string, error) {
 // ---------- PNG ----------
 
 func renderPNG(p QRParams, qr *qrcode.QRCode) ([]byte, error) {
+	// qr.Bitmap() ya trae la zona de silencio (4 modulos por lado):
+	// no hay que sumarla ni desplazar el dibujo, solo escalar y centrar.
 	bm := qr.Bitmap()
 	n := len(bm)
-	quiet := 4
-	scale := p.Size / (n + quiet*2)
+
+	scale := p.Size / n
 	if scale < 1 {
 		scale = 1
 	}
-	qrSize := scale * (n + quiet*2)
+	qrSize := scale * n
 
 	// marco
 	framePad := 0
 	frameBottom := 0
 	if p.Frame != "none" {
-		framePad = 18
+		framePad = p.Size / 28
+		if framePad < 18 {
+			framePad = 18
+		}
 		if p.Frame == "banner" {
-			frameBottom = 44
+			frameBottom = p.Size / 11
+			if frameBottom < 44 {
+				frameBottom = 44
+			}
 		}
 	}
+
+	// titulo debajo del codigo (solo cuando el marco no trae banner)
+	caption := strings.TrimSpace(p.Title)
+	captionH := 0
+	if p.Frame != "banner" && caption != "" {
+		captionH = p.Size / 11
+		if captionH < 44 {
+			captionH = 44
+		}
+	}
+
 	totalW := qrSize + framePad*2
-	totalH := qrSize + framePad*2 + frameBottom
+	totalH := qrSize + framePad*2 + frameBottom + captionH
+	// sin marco el lienzo mide exactamente lo pedido, para que el QR quede
+	// centrado con el margen sobrante repartido a partes iguales
+	if p.Frame == "none" && totalW < p.Size {
+		totalW = p.Size
+	}
+	if p.Frame == "none" && totalH < p.Size+captionH {
+		totalH = p.Size + captionH
+	}
 
 	canvas := image.NewRGBA(image.Rect(0, 0, totalW, totalH))
 	// fondo
 	draw.Draw(canvas, canvas.Bounds(), &image.Uniform{p.Bg}, image.Point{}, draw.Src)
 
-	qrOffX := framePad
-	qrOffY := framePad
+	// area disponible para el codigo (sin banner ni titulo)
+	qrAreaH := totalH - frameBottom - captionH
+	qrOffX := (totalW - qrSize) / 2
+	qrOffY := (qrAreaH - qrSize) / 2
 	drawModules(canvas, bm, p, qrOffX, qrOffY, scale, n)
 
 	// logo
@@ -320,16 +349,19 @@ func renderPNG(p QRParams, qr *qrcode.QRCode) ([]byte, error) {
 	// marco: borde
 	if p.Frame != "none" {
 		fc := p.FrameColor
-		drawRectBorder(canvas, 0, 0, totalW, totalH, 12, 4, fc)
+		bw := p.Size / 128
+		if bw < 4 {
+			bw = 4
+		}
+		drawRectBorder(canvas, 0, 0, totalW, totalH, bw*3, bw, fc)
 	}
 	// texto del marco
 	if p.Frame == "banner" && strings.TrimSpace(p.FrameText) != "" {
-		drawTitle(canvas, p.FrameText, totalW, qrSize+framePad*2, frameBottom, p.FrameColor)
+		drawTitle(canvas, p.FrameText, totalW, qrAreaH, frameBottom, frameBottom/2-2, p.FrameColor)
 	}
-	// titulo adicional (caption) si hay
-	if strings.TrimSpace(p.Title) != "" && p.Frame == "none" {
-		// sin marco, el titulo va debajo del QR como caption
-		// (se omite si ya hay marco con texto para no duplicar)
+	// titulo debajo del codigo
+	if captionH > 0 {
+		drawTitle(canvas, caption, totalW, totalH-captionH, captionH, captionH/2-2, p.Fg)
 	}
 
 	var buf bytes.Buffer
@@ -489,12 +521,15 @@ func drawRectBorder(img *image.RGBA, x, y, w, h, radius, thickness int, c color.
 	}
 }
 
-func drawTitle(img *image.RGBA, title string, width, yStart, height int, col color.Color) {
+func drawTitle(img *image.RGBA, title string, width, yStart, height, fontSize int, col color.Color) {
+	if fontSize < 8 {
+		fontSize = 8
+	}
 	f, err := opentype.Parse(fontBytes)
 	if err != nil {
 		return
 	}
-	face, err := opentype.NewFace(f, &opentype.FaceOptions{Size: 20, DPI: 72})
+	face, err := opentype.NewFace(f, &opentype.FaceOptions{Size: float64(fontSize), DPI: 72})
 	if err != nil {
 		return
 	}
@@ -507,7 +542,7 @@ func drawTitle(img *image.RGBA, title string, width, yStart, height int, col col
 	if x < 8 {
 		x = 8
 	}
-	y := yStart + height/2 + 7
+	y := yStart + height/2 + fontSize*7/20
 	d.Dot = fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
 	d.DrawString(title)
 }
@@ -519,26 +554,52 @@ func resizeImage(src image.Image, w, h int) *image.RGBA {
 }
 
 func qrToSVG(p QRParams, qr *qrcode.QRCode) string {
+	// qr.Bitmap() ya incluye la zona de silencio: solo escala y centra.
 	bm := qr.Bitmap()
 	n := len(bm)
-	quiet := 4
-	scale := p.Size / (n + quiet*2)
+
+	scale := p.Size / n
 	if scale < 1 {
 		scale = 1
 	}
-	qrSize := scale * (n + quiet*2)
-	offset := quiet * scale
+	qrSize := scale * n
 
 	framePad := 0
 	frameBottom := 0
 	if p.Frame != "none" {
-		framePad = 18
+		framePad = p.Size / 28
+		if framePad < 18 {
+			framePad = 18
+		}
 		if p.Frame == "banner" {
-			frameBottom = 44
+			frameBottom = p.Size / 11
+			if frameBottom < 44 {
+				frameBottom = 44
+			}
 		}
 	}
+
+	caption := strings.TrimSpace(p.Title)
+	captionH := 0
+	if p.Frame != "banner" && caption != "" {
+		captionH = p.Size / 11
+		if captionH < 44 {
+			captionH = 44
+		}
+	}
+
 	totalW := qrSize + framePad*2
-	totalH := qrSize + framePad*2 + frameBottom
+	totalH := qrSize + framePad*2 + frameBottom + captionH
+	if p.Frame == "none" && totalW < p.Size {
+		totalW = p.Size
+	}
+	if p.Frame == "none" && totalH < p.Size+captionH {
+		totalH = p.Size + captionH
+	}
+
+	qrAreaH := totalH - frameBottom - captionH
+	qrOffX := (totalW - qrSize) / 2
+	qrOffY := (qrAreaH - qrSize) / 2
 
 	var b strings.Builder
 	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" shape-rendering="crispEdges" font-family="system-ui, -apple-system, sans-serif">`, totalW, totalH, totalW, totalH)
@@ -551,8 +612,8 @@ func qrToSVG(p QRParams, qr *qrcode.QRCode) string {
 				continue
 			}
 			col := moduleColor(p, x, y, n)
-			px := framePad + offset + x*scale
-			py := framePad + offset + y*scale
+			px := qrOffX + x*scale
+			py := qrOffY + y*scale
 			switch p.Shape {
 			case "dots":
 				cx := px + scale/2
@@ -581,8 +642,8 @@ func qrToSVG(p QRParams, qr *qrcode.QRCode) string {
 			logoSize = 32
 		}
 		pad := logoSize/8 + 6
-		cx := framePad + qrSize/2
-		cy := framePad + qrSize/2
+		cx := qrOffX + qrSize/2
+		cy := qrOffY + qrSize/2
 		if p.LogoBg {
 			fmt.Fprintf(&b, `<rect x="%d" y="%d" width="%d" height="%d" fill="%s" rx="4"/>`, cx-logoSize/2-pad, cy-logoSize/2-pad, logoSize+pad*2, logoSize+pad*2, colorHex(p.Bg))
 		}
@@ -597,13 +658,19 @@ func qrToSVG(p QRParams, qr *qrcode.QRCode) string {
 	// marco: borde
 	if p.Frame != "none" {
 		fc := p.FrameColor
-		r := 12
-		// rounded rect border (outer + inner)
-		fmt.Fprintf(&b, `<rect x="2" y="2" width="%d" height="%d" rx="%d" ry="%d" fill="none" stroke="%s" stroke-width="4"/>`, totalW-4, totalH-4, r, r, colorHex(fc))
+		bw := p.Size / 128
+		if bw < 4 {
+			bw = 4
+		}
+		fmt.Fprintf(&b, `<rect x="%d" y="%d" width="%d" height="%d" rx="%d" ry="%d" fill="none" stroke="%s" stroke-width="%d"/>`, bw/2, bw/2, totalW-bw, totalH-bw, bw*3, bw*3, colorHex(fc), bw)
 	}
 	// texto del marco
 	if p.Frame == "banner" && strings.TrimSpace(p.FrameText) != "" {
-		fmt.Fprintf(&b, `<text x="%d" y="%d" text-anchor="middle" font-size="20" font-weight="600" fill="%s">%s</text>`, totalW/2, qrSize+framePad*2+frameBottom/2+7, colorHex(p.FrameColor), escapeXML(p.FrameText))
+		fmt.Fprintf(&b, `<text x="%d" y="%d" text-anchor="middle" font-size="%d" font-weight="600" fill="%s">%s</text>`, totalW/2, qrAreaH+frameBottom/2+frameBottom*7/40, frameBottom/2-2, colorHex(p.FrameColor), escapeXML(p.FrameText))
+	}
+	// titulo debajo del codigo
+	if captionH > 0 {
+		fmt.Fprintf(&b, `<text x="%d" y="%d" text-anchor="middle" font-size="%d" font-weight="600" fill="%s">%s</text>`, totalW/2, totalH-captionH/2+captionH*7/40, captionH/2-2, colorHex(p.Fg), escapeXML(caption))
 	}
 
 	b.WriteString(`</svg>`)
