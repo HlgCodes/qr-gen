@@ -34,26 +34,26 @@
       <p class="mt-2 text-gray-600 max-w-2xl">Pega un enlace o un texto, personaliza colores y tamaño, y descarga tu código QR. Sin registro, sin marca de agua.</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
       <!-- Formulario -->
-      <section class="rounded-lg bg-white p-6 ring-1 ring-gray-200 shadow-sm">
+      <section class="order-2 lg:order-1 rounded-lg bg-white p-5 sm:p-6 ring-1 ring-gray-200 shadow-sm">
         <form id="qr-form" class="space-y-5">
           <div>
             <label for="data" class="block text-sm font-medium text-gray-700 mb-1">Texto o URL</label>
             <textarea id="data" name="data" rows="3" required placeholder="https://www.hlgcodes.com"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+              class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label for="size" class="block text-sm font-medium text-gray-700 mb-1">Tamaño (px)</label>
               <input id="size" name="size" type="number" min="64" max="2048" value="512"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
             </div>
             <div>
               <label for="level" class="block text-sm font-medium text-gray-700 mb-1">Corrección de error</label>
               <select id="level" name="level"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                 <option value="L">Baja (L)</option>
                 <option value="M" selected>Media (M)</option>
                 <option value="Q">Alta (Q)</option>
@@ -69,7 +69,7 @@
                 <input id="fg" name="fg" type="color" value="#111827"
                   class="h-10 w-14 cursor-pointer rounded-md border border-gray-300 bg-white p-1" />
                 <input id="fg-hex" type="text" value="#111827" maxlength="7"
-                  class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  class="flex-1 rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
             </div>
             <div>
@@ -78,7 +78,7 @@
                 <input id="bg" name="bg" type="color" value="#ffffff"
                   class="h-10 w-14 cursor-pointer rounded-md border border-gray-300 bg-white p-1" />
                 <input id="bg-hex" type="text" value="#ffffff" maxlength="7"
-                  class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  class="flex-1 rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
             </div>
           </div>
@@ -98,34 +98,34 @@
           <div>
             <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título (opcional)</label>
             <input id="title" name="title" type="text" maxlength="60" placeholder="Mi código QR"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
             <p class="mt-1 mono text-[10px] text-gray-400">Se imprime debajo del código.</p>
           </div>
 
           <div>
             <label for="logo" class="block text-sm font-medium text-gray-700 mb-1">Logo o imagen (opcional)</label>
             <div class="flex items-center gap-3">
-              <label class="inline-flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+              <label class="inline-flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-3 text-base sm:py-2 sm:text-sm text-gray-700 hover:bg-gray-50">
                 <input id="logo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" />
                 Subir imagen
               </label>
               <span id="logo-name" class="mono text-xs text-gray-400">Ninguna</span>
-              <button type="button" id="logo-clear" class="hidden mono text-xs text-gray-500 hover:text-red-600">quitar</button>
+              <button type="button" id="logo-clear" class="hidden rounded-md border border-gray-300 px-3 py-2 mono text-sm text-gray-500 hover:text-red-600">quitar</button>
             </div>
             <p class="mt-1 mono text-[10px] text-gray-400">PNG o JPG, máx. 2 MB. Se centra sobre el código.</p>
           </div>
 
           <div class="flex flex-wrap gap-2 pt-2">
             <button type="submit"
-              class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700">
+              class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-3 text-base sm:py-2 sm:text-sm w-full sm:w-auto font-medium text-white transition-colors hover:bg-gray-700">
               Generar
             </button>
             <button type="button" id="download-btn" disabled
-              class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-3 text-base sm:py-2 sm:text-sm w-full sm:w-auto font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
               Descargar
             </button>
             <button type="button" id="copy-btn" disabled
-              class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-3 text-base sm:py-2 sm:text-sm w-full sm:w-auto font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
               Copiar enlace
             </button>
           </div>
@@ -134,11 +134,11 @@
       </section>
 
       <!-- Vista previa -->
-      <section class="rounded-lg bg-white p-6 ring-1 ring-gray-200 shadow-sm flex flex-col items-center justify-center">
-        <div class="w-full max-w-sm">
+      <section class="order-1 lg:order-2 rounded-lg bg-white p-5 sm:p-6 ring-1 ring-gray-200 shadow-sm flex flex-col items-center justify-center">
+        <div class="w-full max-w-[260px] sm:max-w-sm">
           <div class="aspect-square w-full rounded-md bg-gray-100 ring-1 ring-gray-200 flex items-center justify-center overflow-hidden">
             <img id="preview" alt="Vista previa del código QR" class="qr-preview max-w-full max-h-full" />
-            <span id="placeholder" class="mono text-xs text-gray-400">La vista previa aparece aquí</span>
+            <span id="placeholder" class="mono text-xs text-gray-400 px-4 text-center">La vista previa aparece aquí</span>
           </div>
           <p class="mt-3 mono text-[11px] text-gray-400 text-center">Escanea con la cámara de tu teléfono para probar.</p>
         </div>
