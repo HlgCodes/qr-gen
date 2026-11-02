@@ -234,9 +234,13 @@ func scanCode(row *sql.Row) (*Code, error) {
 	return &c, nil
 }
 
-func updateCode(userID, id int64, name, data, design string, active bool, hasDesign bool) error {
+func updateCode(userID, id int64, kind, name, data, design string, active bool, hasKind, hasDesign bool) error {
 	q := `UPDATE codes SET name = ?, data = ?, active = ?, updated_at = ?`
 	args := []any{name, data, boolToInt(active), time.Now().Unix()}
+	if hasKind && (kind == "static" || kind == "dynamic") {
+		q += `, kind = ?`
+		args = append(args, kind)
+	}
 	if hasDesign {
 		q += `, design = ?`
 		args = append(args, design)

@@ -578,6 +578,14 @@
             </div>
             </div>
 
+            <p id="dynamic-note" class="mt-3 hidden rounded-xl bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-500">
+              Un QR dinámico codifica un enlace corto: al escanearlo se abre el navegador un instante antes de ir al destino. Para que abra una app directamente (WhatsApp, WiFi, contacto), usa estático.
+            </p>
+
+            <p id="kind-note" class="mt-3 hidden rounded-xl bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-500">
+              Este tipo de código se guarda tal cual: el teléfono lo lee directamente, así que no se puede hacer dinámico.
+            </p>
+
             <div class="mt-4">
               <label for="code-name" class="field-label">Nombre para encontrarlo (opcional)</label>
               <input id="code-name" type="text" maxlength="80" placeholder="Ej. Menú del restaurante" class="field" />
@@ -1395,6 +1403,10 @@
     return s.length > 40 ? s.slice(0, 40) + '…' : s;
   }
 
+  function isWebURL(data) {
+    return /^https?:\/\//i.test(String(data || '').trim());
+  }
+
   function prepareStep4() {
     saved = null;
     if (saveResult) saveResult.classList.add('hidden');
@@ -1402,7 +1414,21 @@
     if (saveStatus) saveStatus.textContent = '';
     if (authStatus) authStatus.textContent = '';
     if (codeName) codeName.value = suggestName(document.getElementById('data').value);
-    setKind(selectedKind);
+
+    const p = buildParams();
+    const urlLike = isWebURL(p.data);
+    const kindBlock = document.getElementById('kind-block');
+    const kindNote = document.getElementById('kind-note');
+    const dynamicNote = document.getElementById('dynamic-note');
+    if (kindBlock) kindBlock.classList.toggle('hidden', !urlLike);
+    if (kindNote) kindNote.classList.toggle('hidden', urlLike);
+    if (dynamicNote) dynamicNote.classList.toggle('hidden', !urlLike);
+    if (!urlLike) {
+      selectedKind = 'static';
+      setKind('static');
+    } else {
+      setKind(selectedKind || 'static');
+    }
   }
 
   async function authAction(path) {
@@ -1449,7 +1475,7 @@
         res = await fetch('/api/codigos/' + editingId, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: (codeName ? codeName.value.trim() : ''), data: p.data, design: design, active: true })
+          body: JSON.stringify({ kind: selectedKind, name: (codeName ? codeName.value.trim() : ''), data: p.data, design: design, active: true })
         });
       } else {
         res = await fetch('/api/codigos', {
@@ -1623,7 +1649,13 @@
       const sub = document.getElementById('step4-sub');
       if (sub) sub.textContent = 'Estás editando un código guardado. Ajusta lo que necesites y guarda los cambios.';
       const kindBlock = document.getElementById('kind-block');
-      if (kindBlock) kindBlock.classList.add('hidden');
+      const kindNote = document.getElementById('kind-note');
+      const dynamicNote = document.getElementById('dynamic-note');
+      const urlLike = isWebURL(c.data);
+      if (kindBlock) kindBlock.classList.toggle('hidden', !urlLike);
+      if (kindNote) kindNote.classList.toggle('hidden', urlLike);
+      if (dynamicNote) dynamicNote.classList.toggle('hidden', !urlLike);
+      setKind(c.kind);
 
       showStep(3);
     } catch (e) {

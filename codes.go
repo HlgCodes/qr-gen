@@ -205,6 +205,7 @@ func handleUpdateCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var in struct {
+		Kind   *string         `json:"kind"`
 		Name   *string         `json:"name"`
 		Data   *string         `json:"data"`
 		Active *bool           `json:"active"`
@@ -243,6 +244,17 @@ func handleUpdateCode(w http.ResponseWriter, r *http.Request) {
 		active = *in.Active
 	}
 
+	hasKind := false
+	kind := c.Kind
+	if in.Kind != nil {
+		if *in.Kind != "static" && *in.Kind != "dynamic" {
+			writeErr(w, http.StatusBadRequest, "tipo invalido")
+			return
+		}
+		hasKind = true
+		kind = *in.Kind
+	}
+
 	hasDesign := false
 	designStr := ""
 	if len(in.Design) > 0 {
@@ -253,7 +265,7 @@ func handleUpdateCode(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := updateCode(u.ID, id, name, data, designStr, active, hasDesign); err != nil {
+	if err := updateCode(u.ID, id, kind, name, data, designStr, active, hasKind, hasDesign); err != nil {
 		writeErr(w, http.StatusNotFound, "ese código no existe")
 		return
 	}
