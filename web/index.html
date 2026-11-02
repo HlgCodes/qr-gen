@@ -16,11 +16,13 @@
   .tap { min-height: 44px; }
   details > summary { list-style: none; }
   details > summary::-webkit-details-marker { display: none; }
+  .step-dot { transition: all .2s ease; }
+  .step-dot.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .step-dot.done { background: #10b981; color: #fff; border-color: #10b981; }
 </style>
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
 
-  <!-- Header -->
   <header class="sticky top-0 z-20 border-b border-gray-200 bg-white/80 backdrop-blur">
     <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2">
@@ -33,322 +35,321 @@
   </header>
 
   <main class="mx-auto max-w-6xl px-4 py-6 sm:py-10">
-    <!-- Hero -->
     <div class="mb-6 sm:mb-8">
       <p class="mono text-[11px] font-semibold tracking-widest text-blue-600 uppercase">Herramienta gratuita</p>
       <h1 class="mt-1 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Generador de códigos QR</h1>
-      <p class="mt-2 text-gray-600 max-w-2xl text-sm sm:text-base">Crea códigos QR personalizados: colores, formas, marcos, logo y título. Sin registro, sin marca de agua, sin límites.</p>
+      <p class="mt-2 text-gray-600 max-w-2xl text-sm sm:text-base">Crea códigos QR personalizados en 3 pasos: elige el tipo, el contenido y el diseño. Sin registro, sin marca de agua.</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-8">
 
-      <!-- Formulario -->
-      <section class="rounded-2xl bg-white p-5 sm:p-6 ring-1 ring-gray-200 shadow-sm space-y-5">
+      <!-- Formulario por pasos -->
+      <section class="rounded-2xl bg-white p-5 sm:p-6 ring-1 ring-gray-200 shadow-sm">
 
-        <!-- Tipo de código -->
-        <div>
-          <p class="text-sm font-semibold text-gray-900 mb-2">Tipo de código</p>
-          <div id="modes" class="flex flex-wrap gap-2">
-            <button type="button" data-mode="text" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Texto / URL</button>
-            <button type="button" data-mode="whatsapp" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">WhatsApp</button>
-            <button type="button" data-mode="wifi" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">WiFi</button>
-            <button type="button" data-mode="vcard" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Contacto</button>
-            <button type="button" data-mode="email" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Email</button>
-            <button type="button" data-mode="tel" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Teléfono</button>
-            <button type="button" data-mode="sms" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">SMS</button>
-            <button type="button" data-mode="geo" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Ubicación</button>
+        <!-- Indicador de pasos -->
+        <div class="flex items-center justify-between mb-6">
+          <button type="button" data-goto="1" class="step flex items-center gap-2">
+            <span data-stepdot="1" class="step-dot active inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-semibold text-gray-500">1</span>
+            <span class="hidden sm:inline text-xs font-medium text-gray-600">Tipo</span>
+          </button>
+          <div class="flex-1 h-px bg-gray-200 mx-2"></div>
+          <button type="button" data-goto="2" class="step flex items-center gap-2">
+            <span data-stepdot="2" class="step-dot inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-semibold text-gray-500">2</span>
+            <span class="hidden sm:inline text-xs font-medium text-gray-600">Contenido</span>
+          </button>
+          <div class="flex-1 h-px bg-gray-200 mx-2"></div>
+          <button type="button" data-goto="3" class="step flex items-center gap-2">
+            <span data-stepdot="3" class="step-dot inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-sm font-semibold text-gray-500">3</span>
+            <span class="hidden sm:inline text-xs font-medium text-gray-600">Diseño</span>
+          </button>
+        </div>
+
+        <!-- Paso 1: Tipo de código -->
+        <div data-step="1" class="space-y-4">
+          <div>
+            <p class="text-sm font-semibold text-gray-900 mb-2">¿Qué quieres compartir?</p>
+            <div id="modes" class="flex flex-wrap gap-2">
+              <button type="button" data-mode="text" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Texto / URL</button>
+              <button type="button" data-mode="whatsapp" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">WhatsApp</button>
+              <button type="button" data-mode="wifi" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">WiFi</button>
+              <button type="button" data-mode="vcard" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Contacto</button>
+              <button type="button" data-mode="email" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Email</button>
+              <button type="button" data-mode="tel" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Teléfono</button>
+              <button type="button" data-mode="sms" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">SMS</button>
+              <button type="button" data-mode="geo" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Ubicación</button>
+            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button type="button" id="btn-next-1" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 tap">Siguiente →</button>
           </div>
         </div>
 
-        <!-- Paneles por modo -->
-        <div data-panel="text" class="mode-panel">
-          <label for="data-text" class="block text-sm font-medium text-gray-700 mb-1">Texto o URL</label>
-          <textarea id="data-text" rows="3" placeholder="https://www.hlgcodes.com"
-            class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">https://www.hlgcodes.com</textarea>
-        </div>
-
-        <div data-panel="whatsapp" class="mode-panel hidden space-y-3">
-          <div class="grid grid-cols-3 gap-3">
+        <!-- Paso 2: Contenido -->
+        <div data-step="2" class="hidden space-y-4">
+          <div data-panel="text" class="mode-panel">
+            <label for="data-text" class="block text-sm font-medium text-gray-700 mb-1">Texto o URL</label>
+            <textarea id="data-text" rows="3" placeholder="https://www.hlgcodes.com"
+              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">https://www.hlgcodes.com</textarea>
+          </div>
+          <div data-panel="whatsapp" class="mode-panel hidden space-y-3">
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label for="wa-cc" class="block text-sm font-medium text-gray-700 mb-1">País</label>
+                <input id="wa-cc" type="text" value="+57" placeholder="+57"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+              <div class="col-span-2">
+                <label for="wa-num" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                <input id="wa-num" type="tel" placeholder="3001234567"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+            </div>
             <div>
-              <label for="wa-cc" class="block text-sm font-medium text-gray-700 mb-1">País</label>
-              <input id="wa-cc" type="text" value="+57" placeholder="+57"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-            </div>
-            <div class="col-span-2">
-              <label for="wa-num" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
-              <input id="wa-num" type="tel" placeholder="3001234567"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <label for="wa-msg" class="block text-sm font-medium text-gray-700 mb-1">Mensaje (opcional)</label>
+              <textarea id="wa-msg" rows="2" placeholder="Hola, quiero información"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
             </div>
           </div>
-          <div>
-            <label for="wa-msg" class="block text-sm font-medium text-gray-700 mb-1">Mensaje (opcional)</label>
-            <textarea id="wa-msg" rows="2" placeholder="Hola, quiero información"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
+          <div data-panel="wifi" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="wifi-ssid" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la red (SSID)</label>
+              <input id="wifi-ssid" type="text" placeholder="MiWiFi"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+            </div>
+            <div>
+              <label for="wifi-pass" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+              <input id="wifi-pass" type="text" placeholder="contraseña"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="wifi-sec" class="block text-sm font-medium text-gray-700 mb-1">Seguridad</label>
+                <select id="wifi-sec"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                  <option value="WPA">WPA / WPA2</option>
+                  <option value="WEP">WEP</option>
+                  <option value="nopass">Sin contraseña</option>
+                </select>
+              </div>
+              <label class="flex items-center gap-2 text-sm text-gray-700 self-end pb-3">
+                <input id="wifi-hidden" type="checkbox" class="accent-blue-600 h-4 w-4" /> Red oculta
+              </label>
+            </div>
+          </div>
+          <div data-panel="vcard" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="vc-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+              <input id="vc-name" type="text" placeholder="Juan Pérez"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="vc-phone" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <input id="vc-phone" type="tel" placeholder="+57 300 123 4567"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+              <div>
+                <label for="vc-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input id="vc-email" type="email" placeholder="juan@ejemplo.com"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="vc-org" class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                <input id="vc-org" type="text" placeholder="Mi Empresa"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+              <div>
+                <label for="vc-title" class="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                <input id="vc-title" type="text" placeholder="Director"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+            </div>
+          </div>
+          <div data-panel="email" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="em-to" class="block text-sm font-medium text-gray-700 mb-1">Destinatario</label>
+              <input id="em-to" type="email" placeholder="contacto@ejemplo.com"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+            </div>
+            <div>
+              <label for="em-subject" class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
+              <input id="em-subject" type="text" placeholder="Consulta"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+            </div>
+            <div>
+              <label for="em-body" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+              <textarea id="em-body" rows="2" placeholder="Hola, quisiera información sobre..."
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
+            </div>
+          </div>
+          <div data-panel="tel" class="mode-panel hidden">
+            <label for="tel-num" class="block text-sm font-medium text-gray-700 mb-1">Número de teléfono</label>
+            <input id="tel-num" type="tel" placeholder="+57 300 123 4567"
+              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+          </div>
+          <div data-panel="sms" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="sms-num" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+              <input id="sms-num" type="tel" placeholder="+57 300 123 4567"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+            </div>
+            <div>
+              <label for="sms-body" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+              <textarea id="sms-body" rows="2" placeholder="Tu mensaje"
+                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
+            </div>
+          </div>
+          <div data-panel="geo" class="mode-panel hidden space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="geo-lat" class="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
+                <input id="geo-lat" type="text" placeholder="4.7110"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+              <div>
+                <label for="geo-lng" class="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
+                <input id="geo-lng" type="text" placeholder="-74.0721"
+                  class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="data" name="data" />
+
+          <div class="flex justify-between pt-2">
+            <button type="button" id="btn-back-2" class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 tap">← Atrás</button>
+            <button type="button" id="btn-next-2" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 tap">Siguiente →</button>
           </div>
         </div>
 
-        <div data-panel="wifi" class="mode-panel hidden space-y-3">
-          <div>
-            <label for="wifi-ssid" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la red (SSID)</label>
-            <input id="wifi-ssid" type="text" placeholder="MiWiFi"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-          </div>
-          <div>
-            <label for="wifi-pass" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input id="wifi-pass" type="text" placeholder="contraseña"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-          </div>
+        <!-- Paso 3: Diseño -->
+        <div data-step="3" class="hidden space-y-4">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label for="wifi-sec" class="block text-sm font-medium text-gray-700 mb-1">Seguridad</label>
-              <select id="wifi-sec"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                <option value="WPA">WPA / WPA2</option>
-                <option value="WEP">WEP</option>
-                <option value="nopass">Sin contraseña</option>
+              <label for="size" class="block text-sm font-medium text-gray-700 mb-1">Tamaño (px)</label>
+              <input id="size" type="number" min="64" max="2048" value="512"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+            </div>
+            <div>
+              <label for="level" class="block text-sm font-medium text-gray-700 mb-1">Corrección</label>
+              <select id="level"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <option value="L">Baja</option>
+                <option value="M" selected>Media</option>
+                <option value="Q">Alta</option>
+                <option value="H">Máxima</option>
               </select>
             </div>
-            <label class="flex items-center gap-2 text-sm text-gray-700 self-end pb-3">
-              <input id="wifi-hidden" type="checkbox" class="accent-blue-600 h-4 w-4" /> Red oculta
-            </label>
           </div>
-        </div>
 
-        <div data-panel="vcard" class="mode-panel hidden space-y-3">
-          <div>
-            <label for="vc-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-            <input id="vc-name" type="text" placeholder="Juan Pérez"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-4">
+            <p class="text-sm font-semibold text-gray-900">Colores</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Código</label>
+                <div class="flex items-center gap-2">
+                  <input id="fg" type="color" value="#111827" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
+                  <input id="fg-hex" type="text" value="#111827" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">Fondo</label>
+                <div class="flex items-center gap-2">
+                  <input id="bg" type="color" value="#ffffff" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
+                  <input id="bg-hex" type="text" value="#ffffff" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label for="gradient" class="block text-sm font-medium text-gray-700 mb-1">Gradiente</label>
+              <select id="gradient"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <option value="none">Ninguno</option>
+                <option value="vertical">Vertical</option>
+                <option value="horizontal">Horizontal</option>
+                <option value="radial">Radial</option>
+              </select>
+            </div>
+            <div id="fg2-wrap" class="hidden">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Color secundario</label>
+              <div class="flex items-center gap-2">
+                <input id="fg2" type="color" value="#2563eb" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
+                <input id="fg2-hex" type="text" value="#2563eb" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
+            </div>
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="vc-phone" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-              <input id="vc-phone" type="tel" placeholder="+57 300 123 4567"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-            </div>
-            <div>
-              <label for="vc-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input id="vc-email" type="email" placeholder="juan@ejemplo.com"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label for="vc-org" class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-              <input id="vc-org" type="text" placeholder="Mi Empresa"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-            </div>
-            <div>
-              <label for="vc-title" class="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
-              <input id="vc-title" type="text" placeholder="Director"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-            </div>
-          </div>
-        </div>
 
-        <div data-panel="email" class="mode-panel hidden space-y-3">
-          <div>
-            <label for="em-to" class="block text-sm font-medium text-gray-700 mb-1">Destinatario</label>
-            <input id="em-to" type="email" placeholder="contacto@ejemplo.com"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+            <p class="text-sm font-semibold text-gray-900">Forma</p>
+            <label for="shape" class="block text-sm font-medium text-gray-700 mb-1">Forma de los módulos</label>
+            <select id="shape"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+              <option value="square">Cuadrados</option>
+              <option value="dots">Puntos</option>
+              <option value="rounded">Redondeados</option>
+            </select>
           </div>
-          <div>
-            <label for="em-subject" class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
-            <input id="em-subject" type="text" placeholder="Consulta"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-          </div>
-          <div>
-            <label for="em-body" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
-            <textarea id="em-body" rows="2" placeholder="Hola, quisiera información sobre..."
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
-          </div>
-        </div>
 
-        <div data-panel="tel" class="mode-panel hidden">
-          <label for="tel-num" class="block text-sm font-medium text-gray-700 mb-1">Número de teléfono</label>
-          <input id="tel-num" type="tel" placeholder="+57 300 123 4567"
-            class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-        </div>
-
-        <div data-panel="sms" class="mode-panel hidden space-y-3">
-          <div>
-            <label for="sms-num" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
-            <input id="sms-num" type="tel" placeholder="+57 300 123 4567"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-          </div>
-          <div>
-            <label for="sms-body" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
-            <textarea id="sms-body" rows="2" placeholder="Tu mensaje"
-              class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
-          </div>
-        </div>
-
-        <div data-panel="geo" class="mode-panel hidden space-y-3">
-          <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+            <p class="text-sm font-semibold text-gray-900">Marco</p>
             <div>
-              <label for="geo-lat" class="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
-              <input id="geo-lat" type="text" placeholder="4.7110"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <label for="frame" class="block text-sm font-medium text-gray-700 mb-1">Tipo de marco</label>
+              <select id="frame"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <option value="none">Ninguno</option>
+                <option value="simple">Simple</option>
+                <option value="banner">Banner (con texto)</option>
+              </select>
+            </div>
+            <div id="frame-text-wrap" class="hidden">
+              <label for="frame-text" class="block text-sm font-medium text-gray-700 mb-1">Texto del marco</label>
+              <input id="frame-text" type="text" value="SCAN ME" maxlength="20"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
             </div>
             <div>
-              <label for="geo-lng" class="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
-              <input id="geo-lng" type="text" placeholder="-74.0721"
-                class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 text-base focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <label for="frame-color" class="block text-sm font-medium text-gray-700 mb-1">Color del marco</label>
+              <div class="flex items-center gap-2">
+                <input id="frame-color" type="color" value="#111827" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
+                <input id="frame-color-hex" type="text" value="#111827" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              </div>
             </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+            <p class="text-sm font-semibold text-gray-900">Logo y título</p>
+            <div>
+              <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título (opcional)</label>
+              <input id="title" type="text" maxlength="60" placeholder="Mi código QR"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
+              <p class="mt-1 text-xs text-gray-400">Se imprime debajo del código.</p>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-700 mb-2">Logo (opcional)</p>
+              <div class="flex items-center gap-3">
+                <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 tap">
+                  <input id="logo" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" />
+                  Subir imagen
+                </label>
+                <span id="logo-name" class="mono text-xs text-gray-400 truncate">Ninguna</span>
+                <button type="button" id="logo-clear" class="hidden rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:text-red-600">Quitar</button>
+              </div>
+              <p class="mt-1 text-xs text-gray-400">PNG o JPG, máx. 2 MB.</p>
+              <label class="mt-2 flex items-center gap-2 text-sm text-gray-700">
+                <input id="logo-bg" type="checkbox" checked class="accent-blue-600 h-4 w-4" /> Fondo blanco detrás del logo
+              </label>
+            </div>
+          </div>
+
+          <div class="flex justify-between pt-2">
+            <button type="button" id="btn-back-3" class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 tap">← Atrás</button>
+            <button type="button" id="btn-generate" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 tap">Generar QR</button>
           </div>
         </div>
 
         <input type="hidden" id="data" name="data" />
 
-        <!-- Personalización -->
-        <div class="rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden">
-          <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-            <p class="text-sm font-semibold text-gray-900">Personalización</p>
-            <div class="flex gap-1 rounded-lg bg-gray-200/60 p-1">
-              <button type="button" data-tab="colors" class="ptab rounded-md px-3 py-1 text-xs font-medium text-gray-600">Colores</button>
-              <button type="button" data-tab="shape" class="ptab rounded-md px-3 py-1 text-xs font-medium text-gray-600">Forma</button>
-              <button type="button" data-tab="frame" class="ptab rounded-md px-3 py-1 text-xs font-medium text-gray-600">Marco</button>
-              <button type="button" data-tab="logo" class="ptab rounded-md px-3 py-1 text-xs font-medium text-gray-600">Logo</button>
-            </div>
-          </div>
-
-          <div class="px-4 py-4 space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label for="size" class="block text-sm font-medium text-gray-700 mb-1">Tamaño (px)</label>
-                <input id="size" type="number" min="64" max="2048" value="512"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-              </div>
-              <div>
-                <label for="level" class="block text-sm font-medium text-gray-700 mb-1">Corrección</label>
-                <select id="level"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                  <option value="L">Baja</option>
-                  <option value="M" selected>Media</option>
-                  <option value="Q">Alta</option>
-                  <option value="H">Máxima</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Tab: Colores -->
-            <div data-tabpanel="colors" class="ptab-panel space-y-4">
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs text-gray-500 mb-1">Código</label>
-                  <div class="flex items-center gap-2">
-                    <input id="fg" type="color" value="#111827" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
-                    <input id="fg-hex" type="text" value="#111827" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-xs text-gray-500 mb-1">Fondo</label>
-                  <div class="flex items-center gap-2">
-                    <input id="bg" type="color" value="#ffffff" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
-                    <input id="bg-hex" type="text" value="#ffffff" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label for="gradient" class="block text-sm font-medium text-gray-700 mb-1">Gradiente</label>
-                <select id="gradient"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                  <option value="none">Ninguno</option>
-                  <option value="vertical">Vertical</option>
-                  <option value="horizontal">Horizontal</option>
-                  <option value="radial">Radial</option>
-                </select>
-              </div>
-              <div id="fg2-wrap" class="hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Color secundario</label>
-                <div class="flex items-center gap-2">
-                  <input id="fg2" type="color" value="#2563eb" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
-                  <input id="fg2-hex" type="text" value="#2563eb" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Tab: Forma -->
-            <div data-tabpanel="shape" class="ptab-panel hidden space-y-3">
-              <div>
-                <label for="shape" class="block text-sm font-medium text-gray-700 mb-1">Forma de los módulos</label>
-                <select id="shape"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                  <option value="square">Cuadrados</option>
-                  <option value="dots">Puntos</option>
-                  <option value="rounded">Redondeados</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Tab: Marco -->
-            <div data-tabpanel="frame" class="ptab-panel hidden space-y-3">
-              <div>
-                <label for="frame" class="block text-sm font-medium text-gray-700 mb-1">Marco</label>
-                <select id="frame"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                  <option value="none">Ninguno</option>
-                  <option value="simple">Simple</option>
-                  <option value="banner">Banner (con texto)</option>
-                </select>
-              </div>
-              <div id="frame-text-wrap" class="hidden">
-                <label for="frame-text" class="block text-sm font-medium text-gray-700 mb-1">Texto del marco</label>
-                <input id="frame-text" type="text" value="SCAN ME" maxlength="20"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-              </div>
-              <div>
-                <label for="frame-color" class="block text-sm font-medium text-gray-700 mb-1">Color del marco</label>
-                <div class="flex items-center gap-2">
-                  <input id="frame-color" type="color" value="#111827" class="h-11 w-14 cursor-pointer rounded-xl border border-gray-200 bg-white p-1" />
-                  <input id="frame-color-hex" type="text" value="#111827" maxlength="7" class="flex-1 rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Tab: Logo -->
-            <div data-tabpanel="logo" class="ptab-panel hidden space-y-3">
-              <div>
-                <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título (opcional)</label>
-                <input id="title" type="text" maxlength="60" placeholder="Mi código QR"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
-                <p class="mt-1 text-xs text-gray-400">Se imprime debajo del código.</p>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-700 mb-2">Logo (opcional)</p>
-                <div class="flex items-center gap-3">
-                  <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 tap">
-                    <input id="logo" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" />
-                    Subir imagen
-                  </label>
-                  <span id="logo-name" class="mono text-xs text-gray-400 truncate">Ninguna</span>
-                  <button type="button" id="logo-clear" class="hidden rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:text-red-600">Quitar</button>
-                </div>
-                <p class="mt-1 text-xs text-gray-400">PNG o JPG, máx. 2 MB.</p>
-                <label class="mt-2 flex items-center gap-2 text-sm text-gray-700">
-                  <input id="logo-bg" type="checkbox" checked class="accent-blue-600 h-4 w-4" /> Fondo blanco detrás del logo
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Acciones -->
-        <div class="flex flex-col sm:flex-row gap-2 pt-1">
-          <button type="button" id="gen-btn"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 tap">
-            Generar
-          </button>
-          <button type="button" id="download-btn" disabled
-            class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed tap">
-            Descargar
-          </button>
-          <button type="button" id="copy-btn" disabled
-            class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed tap">
-            Copiar enlace
-          </button>
-        </div>
-        <p id="status" class="mono text-xs text-gray-500"></p>
       </section>
 
       <!-- Vista previa -->
@@ -361,12 +362,18 @@
         </div>
         <p class="mt-3 mono text-[11px] text-gray-400 text-center">Escanea con la cámara de tu teléfono para probar.</p>
 
-        <div class="mt-6 w-full border-t border-gray-100 pt-5">
-          <h2 class="text-sm font-semibold text-gray-900">Enlace directo (API)</h2>
-          <p class="mt-1 text-xs text-gray-500">Genera un QR sin abrir la página:</p>
-          <pre class="mt-2 overflow-x-auto rounded-xl bg-gray-900 p-3 text-[11px] text-gray-100 mono leading-relaxed">GET /api/qr?data=https://ejemplo.com&size=512&fg=%23111827&bg=%23ffffff&level=M&format=png</pre>
-          <p class="mt-2 text-xs text-gray-500">Parámetros: <span class="mono">data</span>, <span class="mono">size</span> (64-2048), <span class="mono">fg</span>, <span class="mono">bg</span>, <span class="mono">level</span> (L/M/Q/H), <span class="mono">format</span> (png/svg), <span class="mono">title</span>, <span class="mono">shape</span>, <span class="mono">frame</span>, <span class="mono">gradient</span>.</p>
+        <div class="mt-5 flex flex-col sm:flex-row gap-2 w-full">
+          <button type="button" id="download-btn" disabled
+            class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed tap">
+            Descargar
+          </button>
+          <button type="button" id="copy-btn" disabled
+            class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed tap">
+            Copiar enlace
+          </button>
         </div>
+        <p id="status" class="mt-2 mono text-xs text-gray-500 text-center"></p>
+
       </section>
 
     </div>
@@ -378,10 +385,7 @@
     </div>
   </footer>
 
-
 <script>
-  const genBtn = document.getElementById('gen-btn');
-  if (genBtn) genBtn.addEventListener('click', generate);
   const preview = document.getElementById('preview');
   const placeholder = document.getElementById('placeholder');
   const status = document.getElementById('status');
@@ -421,6 +425,25 @@
   if (frameSel) frameSel.addEventListener('change', () => { toggleDesignExtras(); schedule(); });
   toggleDesignExtras();
 
+  // --- Tabs de pasos ---
+  let currentStep = 1;
+  function showStep(n) {
+    currentStep = n;
+    document.querySelectorAll('[data-step]').forEach(el => {
+      el.classList.toggle('hidden', parseInt(el.dataset.step) !== n);
+    });
+    document.querySelectorAll('[data-stepdot]').forEach(el => {
+      const s = parseInt(el.dataset.stepdot);
+      el.classList.remove('active', 'done');
+      if (s === n) el.classList.add('active');
+      else if (s < n) el.classList.add('done');
+    });
+  }
+  document.querySelectorAll('[data-goto]').forEach(btn => {
+    btn.addEventListener('click', () => showStep(parseInt(btn.dataset.goto)));
+  });
+
+  // --- Modos de uso ---
   const modeBtns = document.querySelectorAll('.mode-btn');
   const panels = document.querySelectorAll('.mode-panel');
   let currentMode = 'text';
@@ -563,21 +586,19 @@
     if (el) { el.addEventListener('input', schedule); el.addEventListener('change', schedule); }
   });
 
-  // --- Tabs de personalización ---
-  const ptabs = document.querySelectorAll('.ptab');
-  const ppanels = document.querySelectorAll('.ptab-panel');
-  function setPTab(tab) {
-    ptabs.forEach(b => {
-      const active = b.dataset.tab === tab;
-      b.classList.toggle('bg-white', active);
-      b.classList.toggle('text-gray-900', active);
-      b.classList.toggle('shadow-sm', active);
-      b.classList.toggle('text-gray-600', !active);
-    });
-    ppanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabpanel !== tab));
-  }
-  ptabs.forEach(b => b.addEventListener('click', () => setPTab(b.dataset.tab)));
-  setPTab('colors');
+  const logoBg = document.getElementById('logo-bg');
+  if (logoBg) logoBg.addEventListener('change', schedule);
+
+  const btnBack2 = document.getElementById('btn-back-2');
+  const btnNext2 = document.getElementById('btn-next-2');
+  const btnBack3 = document.getElementById('btn-back-3');
+  const btnGenerate = document.getElementById('btn-generate');
+  const btnNext1 = document.getElementById('btn-next-1');
+  if (btnNext1) btnNext1.addEventListener('click', () => showStep(2));
+  if (btnBack2) btnBack2.addEventListener('click', () => showStep(1));
+  if (btnNext2) btnNext2.addEventListener('click', () => showStep(3));
+  if (btnBack3) btnBack3.addEventListener('click', () => showStep(2));
+  if (btnGenerate) btnGenerate.addEventListener('click', generate);
 
   let timer = null;
   function schedule() { clearTimeout(timer); timer = setTimeout(generate, 300); }
@@ -670,7 +691,9 @@
     catch { status.textContent = 'No se pudo copiar.'; }
   });
 
+  // init
   setMode('text');
+  showStep(1);
 </script>
 EOF
 echo "written"
