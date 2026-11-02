@@ -67,7 +67,7 @@
               <label for="fg" class="block text-sm font-medium text-gray-700 mb-1">Color del código</label>
               <div class="flex items-center gap-2">
                 <input id="fg" name="fg" type="color" value="#111827"
-                  class="h-9 w-12 cursor-pointer rounded border border-gray-300" />
+                  class="h-10 w-14 cursor-pointer rounded-md border border-gray-300 bg-white p-1" />
                 <input id="fg-hex" type="text" value="#111827" maxlength="7"
                   class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
@@ -76,7 +76,7 @@
               <label for="bg" class="block text-sm font-medium text-gray-700 mb-1">Color de fondo</label>
               <div class="flex items-center gap-2">
                 <input id="bg" name="bg" type="color" value="#ffffff"
-                  class="h-9 w-12 cursor-pointer rounded border border-gray-300" />
+                  class="h-10 w-14 cursor-pointer rounded-md border border-gray-300 bg-white p-1" />
                 <input id="bg-hex" type="text" value="#ffffff" maxlength="7"
                   class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
@@ -93,6 +93,26 @@
                 <input type="radio" name="format" value="svg" class="accent-blue-600" /> SVG
               </label>
             </div>
+          </div>
+
+          <div>
+            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Título (opcional)</label>
+            <input id="title" name="title" type="text" maxlength="60" placeholder="Mi código QR"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            <p class="mt-1 mono text-[10px] text-gray-400">Se imprime debajo del código.</p>
+          </div>
+
+          <div>
+            <label for="logo" class="block text-sm font-medium text-gray-700 mb-1">Logo o imagen (opcional)</label>
+            <div class="flex items-center gap-3">
+              <label class="inline-flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <input id="logo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" />
+                Subir imagen
+              </label>
+              <span id="logo-name" class="mono text-xs text-gray-400">Ninguna</span>
+              <button type="button" id="logo-clear" class="hidden mono text-xs text-gray-500 hover:text-red-600">quitar</button>
+            </div>
+            <p class="mt-1 mono text-[10px] text-gray-400">PNG o JPG, máx. 2 MB. Se centra sobre el código.</p>
           </div>
 
           <div class="flex flex-wrap gap-2 pt-2">
@@ -136,7 +156,6 @@
   <footer class="border-t border-gray-200 bg-white mt-12">
     <div class="mx-auto max-w-5xl px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-2">
       <p class="mono text-xs text-gray-400">© HlgCodes — herramienta gratuita</p>
-      <p class="mono text-xs text-gray-400">Hecho con Go · un solo binario</p>
     </div>
   </footer>
 
@@ -163,32 +182,70 @@
   syncColor(bgColor, bgHex);
 
   let timer = null;
+  let logoBase64 = null;
+
   function schedule() { clearTimeout(timer); timer = setTimeout(generate, 300); }
 
-  ['data','size','level'].forEach(id => {
-    document.getElementById(id).addEventListener('input', schedule);
-    document.getElementById(id).addEventListener('change', schedule);
+  ['data','size','level','title'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.addEventListener('input', schedule); el.addEventListener('change', schedule); }
   });
   document.querySelectorAll('input[name="format"]').forEach(el => el.addEventListener('change', schedule));
 
-  function buildUrl() {
-    const data = document.getElementById('data').value.trim();
-    const size = document.getElementById('size').value;
-    const level = document.getElementById('level').value;
-    const format = document.querySelector('input[name="format"]:checked').value;
-    const fg = fgHex.value;
-    const bg = bgHex.value;
-    const params = new URLSearchParams({ data, size, fg, bg, level, format });
+  const logoInput = document.getElementById('logo');
+  const logoName = document.getElementById('logo-name');
+  const logoClear = document.getElementById('logo-clear');
+  logoInput.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { status.textContent = 'El logo supera los 2 MB.'; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      logoBase64 = reader.result; // data URL
+      logoName.textContent = file.name;
+      logoClear.classList.remove('hidden');
+      schedule();
+    };
+    reader.readAsDataURL(file);
+  });
+  logoClear.addEventListener('click', () => {
+    logoBase64 = null;
+    logoInput.value = '';
+    logoName.textContent = 'Ninguna';
+    logoClear.classList.add('hidden');
+    schedule();
+  });
+
+  function buildParams() {
+    return {
+      data: document.getElementById('data').value.trim(),
+      size: parseInt(document.getElementById('size').value, 10) || 512,
+      level: document.getElementById('level').value,
+      format: document.querySelector('input[name="format"]:checked').value,
+      fg: fgHex.value,
+      bg: bgHex.value,
+      title: document.getElementById('title').value.trim(),
+      logo: logoBase64
+    };
+  }
+
+  function buildGetUrl() {
+    const p = buildParams();
+    const params = new URLSearchParams({ data: p.data, size: p.size, fg: p.fg, bg: p.bg, level: p.level, format: p.format });
+    if (p.title) params.set('title', p.title);
     return '/api/qr?' + params.toString();
   }
 
   async function generate() {
-    const data = document.getElementById('data').value.trim();
-    if (!data) { status.textContent = ''; return; }
-    const url = buildUrl();
+    const params = buildParams();
+    if (!params.data) { status.textContent = ''; return; }
     status.textContent = 'Generando…';
     try {
-      const res = await fetch(url);
+      const res = await fetch('/api/qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      });
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
       const objectUrl = URL.createObjectURL(blob);
@@ -197,8 +254,8 @@
       placeholder.classList.add('hidden');
       downloadBtn.disabled = false;
       copyBtn.disabled = false;
-      downloadBtn.dataset.url = url;
-      copyBtn.dataset.url = url + '&download=1';
+      downloadBtn.dataset.blob = objectUrl;
+      copyBtn.dataset.url = buildGetUrl();
       status.textContent = 'Listo.';
     } catch (e) {
       status.textContent = 'Error: ' + e.message;
@@ -207,18 +264,31 @@
 
   form.addEventListener('submit', (e) => { e.preventDefault(); generate(); });
 
-  downloadBtn.addEventListener('click', () => {
-    const url = downloadBtn.dataset.url + '&download=1';
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = '';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  downloadBtn.addEventListener('click', async () => {
+    try {
+      const params = buildParams();
+      const res = await fetch('/api/qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'qr.' + params.format;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      status.textContent = 'Error: ' + e.message;
+    }
   });
 
   copyBtn.addEventListener('click', async () => {
-    const url = new URL(copyBtn.dataset.url, window.location.origin).toString().replace('&download=1','');
+    const url = new URL(copyBtn.dataset.url, window.location.origin).toString();
     try { await navigator.clipboard.writeText(url); status.textContent = 'Enlace copiado.'; }
     catch { status.textContent = 'No se pudo copiar.'; }
   });
