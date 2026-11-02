@@ -11,6 +11,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
+  /* Paleta de marca HlgCodes (B/N total): la misma de hlgcodes.com */
+  :root {
+    --brand-bg: #ffffff;
+    --brand-surface: #f9fafb;
+    --brand-fg: #111827;
+    --brand-muted: #6b7280;
+    --brand-subtle: #9ca3af;
+    --brand-accent: #1a1a1a;
+    --brand-accent-light: #f3f4f6;
+    --brand-border: #e5e7eb;
+    --brand-ring: #d1d5db;
+  }
   body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
   .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
   .qr-preview { image-rendering: pixelated; }
@@ -22,33 +34,34 @@
   .mode-btn:hover { transform: translateY(-2px); }
   .mode-btn .mode-icon { transition: background-color .16s ease, color .16s ease; }
   .mode-btn.is-active {
-    border-color: #3b82f6;
-    background-color: #eff6ff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
+    border-color: var(--brand-accent);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, .1);
   }
-  .mode-btn.is-active .mode-icon { background-color: #2563eb; color: #fff; }
+  .mode-btn.is-active .mode-icon { background-color: var(--brand-accent); color: #fff; }
 
   .step-dot { transition: all .18s ease; }
-  .step-dot.active { background: #2563eb; color: #fff; border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, .14); }
-  .step-dot.done { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+  .step-dot.active { background: var(--brand-accent); color: #fff; border-color: var(--brand-accent); box-shadow: 0 0 0 4px rgba(26, 26, 26, .1); }
+  .step-dot.done { background: var(--brand-accent-light); color: var(--brand-accent); border-color: var(--brand-border); }
 
   .field {
     width: 100%; border-radius: .875rem; border: 1px solid #e5e7eb; background: #fff;
     padding: .75rem .875rem; font-size: 1rem; color: #111827; transition: border-color .15s, box-shadow .15s;
   }
   .field::placeholder { color: #9ca3af; }
-  .field:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, .16); }
+  .field:focus { outline: none; border-color: var(--brand-accent); box-shadow: 0 0 0 3px rgba(26, 26, 26, .1); }
   .field-label { display: block; margin-bottom: .375rem; font-size: .8125rem; font-weight: 500; color: #374151; }
   .field-hint { margin-top: .375rem; font-size: .75rem; color: #9ca3af; }
   .group-card { border: 1px solid #e5e7eb; border-radius: 1rem; padding: 1rem; }
   .swatch { height: 2.75rem; width: 2.75rem; flex: none; cursor: pointer; border-radius: .875rem; border: 1px solid #e5e7eb; background: #fff; padding: 2px; }
   .theme-btn { transition: all .15s ease; }
-  .theme-btn:hover { border-color: #93c5fd; }
+  .theme-btn:hover { border-color: var(--brand-ring); }
+  .theme-btn.is-active { border-color: var(--brand-accent); box-shadow: 0 0 0 2px rgba(26, 26, 26, .08); }
 
   /* cursor de escritura en los mockups de chat */
   .caret {
     display: inline-block; width: 1px; height: 1em; flex: none;
-    background: #2563eb; animation: caret-blink 1.1s steps(1) infinite;
+    background: var(--brand-fg); animation: caret-blink 1.1s steps(1) infinite;
   }
   @keyframes caret-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 
@@ -78,7 +91,7 @@
   <header class="sticky top-0 z-20 border-b border-gray-200/80 bg-white/85 backdrop-blur">
     <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
       <a href="/" class="flex items-center gap-2.5">
-        <span class="mono inline-flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-xs font-bold text-white">&gt;</span>
+        <span class="mono inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-xs font-bold text-white">&gt;</span>
         <span class="text-sm font-semibold tracking-tight">HlgCodes</span>
         <span class="mono rounded-md bg-gray-100 px-1.5 py-0.5 text-[11px] leading-4 text-gray-500">QR</span>
       </a>
@@ -89,7 +102,7 @@
   <main class="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:pt-12">
 
     <div class="mb-7 max-w-2xl sm:mb-9">
-      <p class="mono text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-600">Herramienta gratuita</p>
+      <p class="mono text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Herramienta gratuita</p>
       <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Generador de códigos QR</h1>
       <p class="mt-2.5 text-sm leading-relaxed text-gray-500 sm:text-base">Tres pasos: elige qué quieres compartir, escribe el contenido y ajusta el diseño. Sin registro y sin marca de agua.</p>
     </div>
@@ -124,64 +137,64 @@
 
           <div id="modes" class="mt-5 grid grid-cols-2 gap-3 sm:gap-3.5">
 
-            <button type="button" data-mode="text" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <button type="button" data-mode="text" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">Texto o URL</span>
               <span class="mt-1 text-[11px] leading-snug text-gray-500">Un enlace o un texto libre</span>
             </button>
 
-            <button type="button" data-mode="whatsapp" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+            <button type="button" data-mode="whatsapp" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">WhatsApp</span>
               <span class="mt-1 text-[11px] leading-snug text-gray-500">Abre el chat con el mensaje</span>
             </button>
 
-            <button type="button" data-mode="wifi" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+            <button type="button" data-mode="wifi" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><path d="M12 20h.01"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">WiFi</span>
               <span class="mt-1 text-[11px] leading-snug text-gray-500">Conecta sin escribir clave</span>
             </button>
 
-            <button type="button" data-mode="vcard" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+            <button type="button" data-mode="vcard" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">Contacto</span>
               <span class="mt-1 text-[11px] leading-snug text-gray-500">Guarda tu tarjeta de visita</span>
             </button>
 
-            <button type="button" data-mode="email" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+            <button type="button" data-mode="email" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">Email</span>
               <span class="mt-1 text-[11px] leading-snug text-gray-500">Correo con asunto escrito</span>
             </button>
 
-            <button type="button" data-mode="tel" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+            <button type="button" data-mode="tel" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">Teléfono</span>
               <span class="mt-1 text-[11px] leading-snug text-gray-500">Llama con un solo toque</span>
             </button>
 
-            <button type="button" data-mode="sms" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+            <button type="button" data-mode="sms" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">SMS</span>
               <span class="mt-1 text-[11px] leading-snug text-gray-500">Mensaje de texto listo</span>
             </button>
 
-            <button type="button" data-mode="geo" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
-              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+            <button type="button" data-mode="geo" class="mode-btn flex flex-col rounded-2xl border border-gray-200 bg-white p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/25">
+              <span class="mode-icon mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               </span>
               <span class="text-[13px] font-semibold leading-tight">Ubicación</span>
@@ -240,7 +253,7 @@
                   </select>
                 </div>
                 <label class="flex items-center gap-2 self-end pb-3 text-sm text-gray-700">
-                  <input id="wifi-hidden" type="checkbox" class="h-4 w-4 accent-blue-600" /> Red oculta
+                  <input id="wifi-hidden" type="checkbox" class="h-4 w-4 accent-gray-900" /> Red oculta
                 </label>
               </div>
             </div>
@@ -326,7 +339,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m15 18-6-6 6-6"/></svg>
               Atrás
             </button>
-            <button type="button" id="btn-next-2" class="tap inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700">
+            <button type="button" id="btn-next-2" class="tap inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black">
               Siguiente
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m9 18 6-6-6-6"/></svg>
             </button>
@@ -401,8 +414,8 @@
                 <div id="fg2-wrap" class="hidden">
                   <label for="fg2-hex" class="field-label">Color secundario</label>
                   <div class="flex items-center gap-2">
-                    <input id="fg2" type="color" value="#2563eb" class="swatch" aria-label="Color secundario" />
-                    <input id="fg2-hex" type="text" value="#2563eb" maxlength="7" class="field mono text-[13px]" />
+                    <input id="fg2" type="color" value="#6b7280" class="swatch" aria-label="Color secundario" />
+                    <input id="fg2-hex" type="text" value="#6b7280" maxlength="7" class="field mono text-[13px]" />
                   </div>
                 </div>
               </div>
@@ -465,7 +478,7 @@
                 </div>
                 <p class="field-hint">PNG o JPG, máximo 2 MB. Con logo se sube la corrección a máxima.</p>
                 <label class="mt-2 flex items-center gap-2 text-sm text-gray-700">
-                  <input id="logo-bg" type="checkbox" checked class="h-4 w-4 accent-blue-600" /> Fondo blanco detrás del logo
+                  <input id="logo-bg" type="checkbox" checked class="h-4 w-4 accent-gray-900" /> Fondo blanco detrás del logo
                 </label>
               </div>
             </div>
@@ -477,7 +490,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m15 18-6-6 6-6"/></svg>
               Atrás
             </button>
-            <button type="button" id="btn-generate" class="tap inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700">
+            <button type="button" id="btn-generate" class="tap inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black">
               Generar QR
             </button>
           </div>
@@ -712,8 +725,8 @@
           '<stop offset=".58" stop-color="#ffffff" stop-opacity="0"/>' +
         '</linearGradient>' +
         '<radialGradient id="phLens" cx=".38" cy=".3" r=".85">' +
-          '<stop offset="0" stop-color="#5b86cb"/>' +
-          '<stop offset=".4" stop-color="#1d2c44"/>' +
+          '<stop offset="0" stop-color="#6b7683"/>' +
+          '<stop offset=".4" stop-color="#232a33"/>' +
           '<stop offset="1" stop-color="#04060a"/>' +
         '</radialGradient>' +
       '</defs>' +
@@ -724,7 +737,7 @@
       // isla dinamica con camara
       '<rect x="146" y="24" width="108" height="32" rx="16" fill="#000000"/>' +
       '<circle cx="238" cy="40" r="5.6" fill="url(#phLens)"/>' +
-      '<circle cx="239.8" cy="38.2" r="1.5" fill="#a8c6ff" opacity=".5"/>' +
+      '<circle cx="239.8" cy="38.2" r="1.5" fill="#cdd4dd" opacity=".5"/>' +
       // barra de inicio
       '<rect x="134" y="786" width="132" height="5" rx="2.5" fill="#0a0a0c" opacity=".8"/>' +
     '</svg>';
@@ -776,14 +789,14 @@
         const secTxt = secEl ? secEl.options[secEl.selectedIndex].text : 'WPA / WPA2';
         const pass = val('wifi-pass');
         return phoneShell(
-          '<div class="flex flex-1 flex-col items-center justify-center gap-2 bg-gradient-to-b from-sky-50 to-white px-4 text-center">' +
-            '<div class="text-sky-500">' + ICON.wifi + '</div>' +
+          '<div class="flex flex-1 flex-col items-center justify-center gap-2 bg-gradient-to-b from-gray-100 to-white px-4 text-center">' +
+            '<div class="text-gray-700">' + ICON.wifi + '</div>' +
             '<p class="max-w-full truncate text-[12px] font-semibold text-gray-900">' + esc(ssid) + '</p>' +
             '<p class="text-[8px] text-gray-500">' + esc(secTxt) + '</p>' +
             (pass
               ? '<p class="font-mono text-[9px] tracking-widest text-gray-400">' + esc('•'.repeat(Math.min(pass.length, 14))) + '</p>'
               : '<p class="text-[9px] text-gray-400">Red abierta</p>') +
-            '<div class="mt-2 w-full rounded-full bg-blue-600 py-1.5 text-[10px] font-semibold text-white">Conectar</div>' +
+            '<div class="mt-2 w-full rounded-full bg-gray-900 py-1.5 text-[10px] font-semibold text-white">Conectar</div>' +
             '<p class="text-[8px] leading-snug text-gray-400">Se une a la red sin escribir la clave</p>' +
           '</div>');
       }
@@ -797,7 +810,7 @@
           '<div class="flex flex-1 flex-col gap-3 bg-white p-4">' +
             '<p class="text-[9px] font-semibold uppercase tracking-wider text-gray-400">Contacto nuevo</p>' +
             '<div class="flex flex-col items-center gap-1.5 text-center">' +
-              '<div class="grid h-14 w-14 place-items-center rounded-full bg-violet-100 text-[16px] font-bold text-violet-600">' + esc(iniciales(nombre)) + '</div>' +
+              '<div class="grid h-14 w-14 place-items-center rounded-full bg-gray-100 text-[16px] font-bold text-gray-700">' + esc(iniciales(nombre)) + '</div>' +
               '<p class="max-w-full truncate text-[12px] font-semibold text-gray-900">' + esc(nombre) + '</p>' +
               '<p class="max-w-full truncate text-[9px] text-gray-500">' + esc([cargo, org].filter(Boolean).join(' · ') || 'Sin empresa') + '</p>' +
             '</div>' +
@@ -805,7 +818,7 @@
               '<p class="truncate">' + esc(tel) + '</p>' +
               '<p class="truncate">' + esc(mail) + '</p>' +
             '</div>' +
-            '<div class="mt-auto rounded-full bg-blue-600 py-1.5 text-center text-[10px] font-semibold text-white">Guardar contacto</div>' +
+            '<div class="mt-auto rounded-full bg-gray-900 py-1.5 text-center text-[10px] font-semibold text-white">Guardar contacto</div>' +
           '</div>');
       }
       case 'email': {
@@ -814,14 +827,14 @@
         const cuerpo = val('em-body') || 'Hola, quisiera información…';
         return phoneShell(
           '<div class="flex items-center justify-between border-b border-gray-100 px-3 py-2 text-[10px]">' +
-            '<span class="text-gray-400">Cancelar</span><span class="font-semibold text-gray-900">Nuevo mensaje</span><span class="font-semibold text-blue-600">Enviar</span>' +
+            '<span class="text-gray-400">Cancelar</span><span class="font-semibold text-gray-900">Nuevo mensaje</span><span class="font-semibold text-gray-900">Enviar</span>' +
           '</div>' +
           '<div class="space-y-1.5 px-3 py-2 text-[9px]">' +
             '<div class="flex gap-2 border-b border-gray-100 pb-1.5"><span class="w-10 flex-none text-gray-400">Para</span><span class="min-w-0 truncate text-gray-800">' + esc(to) + '</span></div>' +
             '<div class="flex gap-2 border-b border-gray-100 pb-1.5"><span class="w-10 flex-none text-gray-400">Asunto</span><span class="min-w-0 truncate text-gray-800">' + esc(asunto) + '</span></div>' +
           '</div>' +
           '<div class="flex-1 overflow-hidden px-3 py-1 text-[10px] leading-snug text-gray-600">' + esc(cuerpo) + '</div>' +
-          '<div class="px-3 pt-1 pb-[11px]"><div class="rounded-full bg-blue-600 py-1.5 text-center text-[10px] font-semibold text-white">Enviar correo</div></div>');
+          '<div class="px-3 pt-1 pb-[11px]"><div class="rounded-full bg-gray-900 py-1.5 text-center text-[10px] font-semibold text-white">Enviar correo</div></div>');
       }
       case 'tel': {
         const num = val('tel-num') || '+57 300 123 4567';
@@ -829,7 +842,7 @@
           '<div class="flex flex-1 flex-col items-center justify-center gap-2 bg-white px-4 text-center">' +
             '<p class="text-[9px] text-gray-400">Llamar a</p>' +
             '<p class="max-w-full truncate text-[15px] font-semibold tracking-tight text-gray-900">' + esc(num) + '</p>' +
-            '<div class="mt-3 grid h-12 w-12 place-items-center rounded-full bg-emerald-500 text-white shadow-lg">' +
+            '<div class="mt-3 grid h-12 w-12 place-items-center rounded-full bg-gray-900 text-white shadow-lg">' +
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
             '</div>' +
             '<p class="text-[8px] text-gray-400">Toca para llamar</p>' +
@@ -850,7 +863,7 @@
               '<span class="min-w-0 break-words">' + esc(body) + '</span>' +
               '<span class="caret mt-[1px]"></span>' +
             '</div>' +
-            '<div class="grid h-6 w-6 flex-none place-items-center rounded-full bg-blue-500 text-[9px] text-white">↑</div>' +
+            '<div class="grid h-6 w-6 flex-none place-items-center rounded-full bg-gray-900 text-[9px] text-white">↑</div>' +
           '</div>');
       }
       case 'geo': {
@@ -860,7 +873,7 @@
           '<div class="relative flex flex-1 items-center justify-center bg-[#e8f0e4]">' +
             '<div class="absolute inset-0 opacity-70" style="background-image:linear-gradient(#cfe0c9 1px,transparent 1px),linear-gradient(90deg,#cfe0c9 1px,transparent 1px);background-size:24px 24px"></div>' +
             '<div class="relative flex flex-col items-center gap-1">' +
-              '<div class="grid h-9 w-9 place-items-center rounded-full bg-orange-500 text-white shadow-lg">' + ICON.pin + '</div>' +
+              '<div class="grid h-9 w-9 place-items-center rounded-full bg-gray-900 text-white shadow-lg">' + ICON.pin + '</div>' +
               '<p class="mt-1 rounded bg-white/90 px-2 py-1 font-mono text-[9px] font-semibold text-gray-900">' + esc(lat) + ', ' + esc(lng) + '</p>' +
               '<p class="text-[8px] text-gray-600">Abrir en el mapa</p>' +
             '</div>' +
@@ -877,7 +890,7 @@
             '</div>' +
           '</div>' +
           '<div class="flex flex-1 flex-col items-center justify-center gap-2 px-5 text-center">' +
-            '<div class="text-blue-500">' + ICON.globe + '</div>' +
+            '<div class="text-gray-400">' + ICON.globe + '</div>' +
             '<p class="text-[11px] font-semibold text-gray-900">Se abre el enlace</p>' +
             '<p class="text-[9px] leading-snug text-gray-500">Al escanear, el teléfono carga esta dirección en el navegador.</p>' +
           '</div>');
