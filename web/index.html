@@ -39,10 +39,167 @@
       <section class="order-2 lg:order-1 rounded-lg bg-white p-5 sm:p-6 ring-1 ring-gray-200 shadow-sm">
         <form id="qr-form" class="space-y-5">
           <div>
-            <label for="data" class="block text-sm font-medium text-gray-700 mb-1">Texto o URL</label>
-            <textarea id="data" name="data" rows="3" required placeholder="https://www.hlgcodes.com"
+            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de código</label>
+            <div id="modes" class="flex flex-wrap gap-2">
+              <button type="button" data-mode="text" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">Texto / URL</button>
+              <button type="button" data-mode="whatsapp" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">WhatsApp</button>
+              <button type="button" data-mode="wifi" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">WiFi</button>
+              <button type="button" data-mode="vcard" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">Contacto</button>
+              <button type="button" data-mode="email" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">Email</button>
+              <button type="button" data-mode="tel" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">Teléfono</button>
+              <button type="button" data-mode="sms" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">SMS</button>
+              <button type="button" data-mode="geo" class="mode-btn rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">Ubicación</button>
+            </div>
+          </div>
+
+          <!-- Texto / URL -->
+          <div data-panel="text" class="mode-panel">
+            <label for="data-text" class="block text-sm font-medium text-gray-700 mb-1">Texto o URL</label>
+            <textarea id="data-text" rows="3" placeholder="https://www.hlgcodes.com"
               class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
           </div>
+
+          <!-- WhatsApp -->
+          <div data-panel="whatsapp" class="mode-panel hidden space-y-3">
+            <div class="grid grid-cols-3 gap-3">
+              <div class="col-span-1">
+                <label for="wa-cc" class="block text-sm font-medium text-gray-700 mb-1">País</label>
+                <input id="wa-cc" type="text" value="+57" placeholder="+57"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div class="col-span-2">
+                <label for="wa-num" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                <input id="wa-num" type="tel" placeholder="3001234567"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div>
+              <label for="wa-msg" class="block text-sm font-medium text-gray-700 mb-1">Mensaje (opcional)</label>
+              <textarea id="wa-msg" rows="2" placeholder="Hola, quiero información"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+          </div>
+
+          <!-- WiFi -->
+          <div data-panel="wifi" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="wifi-ssid" class="block text-sm font-medium text-gray-700 mb-1">Nombre de la red (SSID)</label>
+              <input id="wifi-ssid" type="text" placeholder="MiWiFi"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="wifi-pass" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+              <input id="wifi-pass" type="text" placeholder="contraseña"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="wifi-sec" class="block text-sm font-medium text-gray-700 mb-1">Seguridad</label>
+                <select id="wifi-sec"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <option value="WPA">WPA / WPA2</option>
+                  <option value="WEP">WEP</option>
+                  <option value="nopass">Sin contraseña</option>
+                </select>
+              </div>
+              <div class="flex items-end">
+                <label class="flex items-center gap-2 text-sm text-gray-700 pb-3">
+                  <input id="wifi-hidden" type="checkbox" class="accent-blue-600" /> Red oculta
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contacto (vCard) -->
+          <div data-panel="vcard" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="vc-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+              <input id="vc-name" type="text" placeholder="Juan Pérez"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="vc-phone" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <input id="vc-phone" type="tel" placeholder="+57 300 123 4567"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label for="vc-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input id="vc-email" type="email" placeholder="juan@ejemplo.com"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="vc-org" class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                <input id="vc-org" type="text" placeholder="Mi Empresa"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label for="vc-title" class="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                <input id="vc-title" type="text" placeholder="Director"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div data-panel="email" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="em-to" class="block text-sm font-medium text-gray-700 mb-1">Destinatario</label>
+              <input id="em-to" type="email" placeholder="contacto@ejemplo.com"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="em-subject" class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
+              <input id="em-subject" type="text" placeholder="Consulta"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="em-body" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+              <textarea id="em-body" rows="2" placeholder="Hola, quisiera información sobre..."
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+          </div>
+
+          <!-- Teléfono -->
+          <div data-panel="tel" class="mode-panel hidden">
+            <label for="tel-num" class="block text-sm font-medium text-gray-700 mb-1">Número de teléfono</label>
+            <input id="tel-num" type="tel" placeholder="+57 300 123 4567"
+              class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+
+          <!-- SMS -->
+          <div data-panel="sms" class="mode-panel hidden space-y-3">
+            <div>
+              <label for="sms-num" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+              <input id="sms-num" type="tel" placeholder="+57 300 123 4567"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="sms-body" class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+              <textarea id="sms-body" rows="2" placeholder="Tu mensaje"
+                class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+            </div>
+          </div>
+
+          <!-- Ubicación -->
+          <div data-panel="geo" class="mode-panel hidden space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="geo-lat" class="block text-sm font-medium text-gray-700 mb-1">Latitud</label>
+                <input id="geo-lat" type="text" placeholder="4.7110"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label for="geo-lng" class="block text-sm font-medium text-gray-700 mb-1">Longitud</label>
+                <input id="geo-lng" type="text" placeholder="-74.0721"
+                  class="w-full rounded-md border border-gray-300 px-3 py-3 text-base sm:py-2 sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="data" name="data" />
 
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -178,12 +335,150 @@
       if (/^#[0-9a-fA-F]{6}$/.test(hex.value)) { picker.value = hex.value; schedule(); }
     });
   }
-  syncColor(fgColor, fgHex);
-  syncColor(bgColor, bgHex);
+  // --- Modos de uso (casos encapsulados) ---
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  const panels = document.querySelectorAll('.mode-panel');
+  let currentMode = 'text';
+
+  function setMode(mode) {
+    currentMode = mode;
+    modeBtns.forEach(btn => {
+      const active = btn.dataset.mode === mode;
+      btn.classList.toggle('bg-blue-600', active);
+      btn.classList.toggle('text-white', active);
+      btn.classList.toggle('border-blue-600', active);
+      btn.classList.toggle('bg-white', !active);
+      btn.classList.toggle('text-gray-700', !active);
+      btn.classList.toggle('border-gray-300', !active);
+    });
+    panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== mode));
+    computeData();
+    schedule();
+  }
+
+  modeBtns.forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+
+  function enc(v) { return encodeURIComponent(v.trim()); }
+
+  function computeData() {
+    let d = '';
+    switch (currentMode) {
+      case 'text':
+        d = document.getElementById('data-text').value.trim();
+        break;
+      case 'whatsapp': {
+        const cc = document.getElementById('wa-cc').value.replace(/\\D/g, '');
+        const num = document.getElementById('wa-num').value.replace(/\\D/g, '');
+        const msg = document.getElementById('wa-msg').value.trim();
+        if (cc && num) {
+          d = 'https://wa.me/' + cc + num;
+          if (msg) d += '?text=' + encodeURIComponent(msg);
+        }
+        break;
+      }
+      case 'wifi': {
+        const ssid = document.getElementById('wifi-ssid').value.trim();
+        const pass = document.getElementById('wifi-pass').value;
+        const sec = document.getElementById('wifi-sec').value;
+        const hidden = document.getElementById('wifi-hidden').checked;
+        if (ssid) {
+          d = 'WIFI:T:' + sec + ';S:' + ssid + ';P:' + pass + ';' + (hidden ? 'H:true;' : '') + ';';
+        }
+        break;
+      }
+      case 'vcard': {
+        const name = document.getElementById('vc-name').value.trim();
+        const phone = document.getElementById('vc-phone').value.trim();
+        const email = document.getElementById('vc-email').value.trim();
+        const org = document.getElementById('vc-org').value.trim();
+        const title = document.getElementById('vc-title').value.trim();
+        if (name || phone || email) {
+          const lines = ['BEGIN:VCARD', 'VERSION:3.0'];
+          if (name) lines.push('FN:' + name);
+          if (phone) lines.push('TEL:' + phone);
+          if (email) lines.push('EMAIL:' + email);
+          if (org) lines.push('ORG:' + org);
+          if (title) lines.push('TITLE:' + title);
+          lines.push('END:VCARD');
+          d = lines.join('\\n');
+        }
+        break;
+      }
+      case 'email': {
+        const to = document.getElementById('em-to').value.trim();
+        const subject = document.getElementById('em-subject').value.trim();
+        const body = document.getElementById('em-body').value.trim();
+        if (to) {
+          d = 'mailto:' + to;
+          const q = [];
+          if (subject) q.push('subject=' + encodeURIComponent(subject));
+          if (body) q.push('body=' + encodeURIComponent(body));
+          if (q.length) d += '?' + q.join('&');
+        }
+        break;
+      }
+      case 'tel': {
+        const num = document.getElementById('tel-num').value.trim();
+        if (num) d = 'tel:' + num;
+        break;
+      }
+      case 'sms': {
+        const num = document.getElementById('sms-num').value.trim();
+        const body = document.getElementById('sms-body').value.trim();
+        if (num) {
+          d = 'sms:' + num;
+          if (body) d += '?body=' + encodeURIComponent(body);
+        }
+        break;
+      }
+      case 'geo': {
+        const lat = document.getElementById('geo-lat').value.trim();
+        const lng = document.getElementById('geo-lng').value.trim();
+        if (lat && lng) d = 'geo:' + lat + ',' + lng;
+        break;
+      }
+    }
+    document.getElementById('data').value = d;
+  }
+
+  document.querySelectorAll('.mode-panel input, .mode-panel textarea, .mode-panel select').forEach(el => {
+    el.addEventListener('input', () => { computeData(); schedule(); });
+    el.addEventListener('change', () => { computeData(); schedule(); });
+  });
+  const dataText = document.getElementById('data-text');
+  if (dataText) dataText.addEventListener('input', () => { computeData(); schedule(); });
+
+  // --- logo ---
+  let logoBase64 = null;
+  const logoInput = document.getElementById('logo');
+  const logoName = document.getElementById('logo-name');
+  const logoClear = document.getElementById('logo-clear');
+  if (logoInput) {
+    logoInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { status.textContent = 'El logo supera los 2 MB.'; return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        logoBase64 = reader.result;
+        logoName.textContent = file.name;
+        logoClear.classList.remove('hidden');
+        computeData(); schedule();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  if (logoClear) {
+    logoClear.addEventListener('click', () => {
+      logoBase64 = null;
+      if (logoInput) logoInput.value = '';
+      logoName.textContent = 'Ninguna';
+      logoClear.classList.add('hidden');
+      computeData(); schedule();
+    });
+  }
 
   let timer = null;
-  let logoBase64 = null;
-
   function schedule() { clearTimeout(timer); timer = setTimeout(generate, 300); }
 
   ['data','size','level','title'].forEach(id => {
@@ -261,6 +556,9 @@
       status.textContent = 'Error: ' + e.message;
     }
   }
+
+  // activar modo por defecto
+  setMode('text');
 
   form.addEventListener('submit', (e) => { e.preventDefault(); generate(); });
 
