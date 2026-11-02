@@ -335,7 +335,7 @@
 
         <!-- Acciones -->
         <div class="flex flex-col sm:flex-row gap-2 pt-1">
-          <button type="submit"
+          <button type="button" id="gen-btn"
             class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 tap">
             Generar
           </button>
@@ -378,10 +378,10 @@
     </div>
   </footer>
 
-  <input type="hidden" id="data" name="data" />
 
 <script>
-  const form = document.getElementById('qr-form');
+  const genBtn = document.getElementById('gen-btn');
+  if (genBtn) genBtn.addEventListener('click', generate);
   const preview = document.getElementById('preview');
   const placeholder = document.getElementById('placeholder');
   const status = document.getElementById('status');
@@ -640,8 +640,6 @@
       status.textContent = 'Error: ' + e.message;
     }
   }
-
-  form.addEventListener('submit', (e) => { e.preventDefault(); generate(); });
 
   downloadBtn.addEventListener('click', async () => {
     try {
