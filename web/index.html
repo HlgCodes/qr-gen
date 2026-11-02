@@ -487,29 +487,6 @@
   });
   document.querySelectorAll('input[name="format"]').forEach(el => el.addEventListener('change', schedule));
 
-  const logoInput = document.getElementById('logo');
-  const logoName = document.getElementById('logo-name');
-  const logoClear = document.getElementById('logo-clear');
-  logoInput.addEventListener('change', async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { status.textContent = 'El logo supera los 2 MB.'; return; }
-    const reader = new FileReader();
-    reader.onload = () => {
-      logoBase64 = reader.result; // data URL
-      logoName.textContent = file.name;
-      logoClear.classList.remove('hidden');
-      schedule();
-    };
-    reader.readAsDataURL(file);
-  });
-  logoClear.addEventListener('click', () => {
-    logoBase64 = null;
-    logoInput.value = '';
-    logoName.textContent = 'Ninguna';
-    logoClear.classList.add('hidden');
-    schedule();
-  });
 
   function buildParams() {
     return {
