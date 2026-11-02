@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"math"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -25,18 +26,26 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 )
 
+// go:embed is not available in this toolchain; font bytes live in fontdata.go.
 
 // QRParams agrupa lo que el usuario puede pedir.
 type QRParams struct {
-	Data    string
-	Size    int
-	Fg      color.RGBA
-	Bg      color.RGBA
-	Level   qrcode.RecoveryLevel
-	Format  string // "png" o "svg"
-	Title   string
-	Logo    image.Image
-	LogoB64 string // entrada cruda (base64 o data URL)
+	Data       string
+	Size       int
+	Fg         color.RGBA
+	Fg2        color.RGBA
+	Bg         color.RGBA
+	Level      qrcode.RecoveryLevel
+	Format     string // "png" o "svg"
+	Title      string
+	Logo       image.Image
+	LogoB64    string
+	Shape      string // "square", "dots", "rounded"
+	Frame      string // "none", "simple", "banner"
+	FrameText  string
+	FrameColor color.RGBA
+	Gradient   string // "none", "vertical", "horizontal", "radial"
+	LogoBg     bool   // pad blanco detras del logo
 }
 
 var hexRe = regexp.MustCompile(`^#?[0-9a-fA-F]{6}$`)
@@ -85,11 +94,18 @@ func decodeLogo(b64str string) (image.Image, error) {
 
 func paramsFromRequest(r *http.Request) (QRParams, error) {
 	p := QRParams{
-		Size:   512,
-		Fg:     color.RGBA{0, 0, 0, 255},
-		Bg:     color.RGBA{255, 255, 255, 255},
-		Level:  qrcode.Medium,
-		Format: "png",
+		Size:       512,
+		Fg:         color.RGBA{0, 0, 0, 255},
+		Fg2:        color.RGBA{0, 0, 0, 255},
+		Bg:         color.RGBA{255, 255, 255, 255},
+		Level:      qrcode.Medium,
+		Format:     "png",
+		Shape:      "square",
+		Frame:      "none",
+		FrameText:  "SCAN ME",
+		FrameColor: color.RGBA{0, 0, 0, 255},
+		Gradient:   "none",
+		LogoBg:     true,
 	}
 	q := r.URL.Query()
 	if v := q.Get("data"); v != "" {
@@ -103,6 +119,9 @@ func paramsFromRequest(r *http.Request) (QRParams, error) {
 	if v := q.Get("fg"); v != "" {
 		p.Fg = parseColor(v, p.Fg)
 	}
+	if v := q.Get("fg2"); v != "" {
+		p.Fg2 = parseColor(v, p.Fg2)
+	}
 	if v := q.Get("bg"); v != "" {
 		p.Bg = parseColor(v, p.Bg)
 	}
@@ -115,20 +134,45 @@ func paramsFromRequest(r *http.Request) (QRParams, error) {
 	if v := q.Get("title"); v != "" {
 		p.Title = v
 	}
+	if v := q.Get("shape"); v != "" {
+		p.Shape = strings.ToLower(v)
+	}
+	if v := q.Get("frame"); v != "" {
+		p.Frame = strings.ToLower(v)
+	}
+	if v := q.Get("frameText"); v != "" {
+		p.FrameText = v
+	}
+	if v := q.Get("frameColor"); v != "" {
+		p.FrameColor = parseColor(v, p.FrameColor)
+	}
+	if v := q.Get("gradient"); v != "" {
+		p.Gradient = strings.ToLower(v)
+	}
+	if v := q.Get("logoBg"); v != "" {
+		p.LogoBg = v != "0" && v != "false"
+	}
 	if v := q.Get("logo"); v != "" {
 		p.LogoB64 = v
 	}
 
 	if r.Method == http.MethodPost && r.Body != nil {
 		var body struct {
-			Data   string `json:"data"`
-			Size   int    `json:"size"`
-			Fg     string `json:"fg"`
-			Bg     string `json:"bg"`
-			Level  string `json:"level"`
-			Format string `json:"format"`
-			Title  string `json:"title"`
-			Logo   string `json:"logo"`
+			Data       string `json:"data"`
+			Size       int    `json:"size"`
+			Fg         string `json:"fg"`
+			Fg2        string `json:"fg2"`
+			Bg         string `json:"bg"`
+			Level      string `json:"level"`
+			Format     string `json:"format"`
+			Title      string `json:"title"`
+			Shape      string `json:"shape"`
+			Frame      string `json:"frame"`
+			FrameText  string `json:"frameText"`
+			FrameColor string `json:"frameColor"`
+			Gradient   string `json:"gradient"`
+			LogoBg     *bool  `json:"logoBg"`
+			Logo       string `json:"logo"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
 			if body.Data != "" {
@@ -139,6 +183,9 @@ func paramsFromRequest(r *http.Request) (QRParams, error) {
 			}
 			if body.Fg != "" {
 				p.Fg = parseColor(body.Fg, p.Fg)
+			}
+			if body.Fg2 != "" {
+				p.Fg2 = parseColor(body.Fg2, p.Fg2)
 			}
 			if body.Bg != "" {
 				p.Bg = parseColor(body.Bg, p.Bg)
@@ -151,6 +198,24 @@ func paramsFromRequest(r *http.Request) (QRParams, error) {
 			}
 			if body.Title != "" {
 				p.Title = body.Title
+			}
+			if body.Shape != "" {
+				p.Shape = strings.ToLower(body.Shape)
+			}
+			if body.Frame != "" {
+				p.Frame = strings.ToLower(body.Frame)
+			}
+			if body.FrameText != "" {
+				p.FrameText = body.FrameText
+			}
+			if body.FrameColor != "" {
+				p.FrameColor = parseColor(body.FrameColor, p.FrameColor)
+			}
+			if body.Gradient != "" {
+				p.Gradient = strings.ToLower(body.Gradient)
+			}
+			if body.LogoBg != nil {
+				p.LogoBg = *body.LogoBg
 			}
 			if body.Logo != "" {
 				p.LogoB64 = body.Logo
@@ -177,7 +242,6 @@ func paramsFromRequest(r *http.Request) (QRParams, error) {
 			return p, err
 		}
 		p.Logo = img
-		// con logo, subir la correccion de error para que siga escaneando
 		if p.Level == qrcode.Medium {
 			p.Level = qrcode.Highest
 		}
@@ -203,37 +267,69 @@ func renderQR(p QRParams) ([]byte, string, error) {
 	return data, "image/png", nil
 }
 
+// ---------- PNG ----------
+
 func renderPNG(p QRParams, qr *qrcode.QRCode) ([]byte, error) {
-	qrSize := p.Size
-	titleH := 0
-	if strings.TrimSpace(p.Title) != "" {
-		titleH = 48
+	bm := qr.Bitmap()
+	n := len(bm)
+	quiet := 4
+	scale := p.Size / (n + quiet*2)
+	if scale < 1 {
+		scale = 1
 	}
-	totalH := qrSize + titleH
+	qrSize := scale * (n + quiet*2)
 
-	qrImg := qr.Image(qrSize)
+	// marco
+	framePad := 0
+	frameBottom := 0
+	if p.Frame != "none" {
+		framePad = 18
+		if p.Frame == "banner" {
+			frameBottom = 44
+		}
+	}
+	totalW := qrSize + framePad*2
+	totalH := qrSize + framePad*2 + frameBottom
 
-	canvas := image.NewRGBA(image.Rect(0, 0, qrSize, totalH))
+	canvas := image.NewRGBA(image.Rect(0, 0, totalW, totalH))
+	// fondo
 	draw.Draw(canvas, canvas.Bounds(), &image.Uniform{p.Bg}, image.Point{}, draw.Src)
-	draw.Draw(canvas, image.Rect(0, 0, qrSize, qrSize), qrImg, image.Point{}, draw.Over)
 
-	// logo centrado con pad blanco
+	qrOffX := framePad
+	qrOffY := framePad
+	drawModules(canvas, bm, p, qrOffX, qrOffY, scale, n)
+
+	// logo
 	if p.Logo != nil {
 		logoSize := qrSize / 4
 		if logoSize < 32 {
 			logoSize = 32
 		}
 		resized := resizeImage(p.Logo, logoSize, logoSize)
-		pad := logoSize/8 + 6
-		cx, cy := qrSize/2, qrSize/2
-		padRect := image.Rect(cx-logoSize/2-pad, cy-logoSize/2-pad, cx+logoSize/2+pad, cy+logoSize/2+pad)
-		draw.Draw(canvas, padRect, &image.Uniform{p.Bg}, image.Point{}, draw.Src)
+		cx := qrOffX + qrSize/2
+		cy := qrOffY + qrSize/2
+		if p.LogoBg {
+			pad := logoSize/8 + 6
+			padRect := image.Rect(cx-logoSize/2-pad, cy-logoSize/2-pad, cx+logoSize/2+pad, cy+logoSize/2+pad)
+			draw.Draw(canvas, padRect, &image.Uniform{p.Bg}, image.Point{}, draw.Src)
+		}
 		off := image.Point{X: cx - logoSize/2, Y: cy - logoSize/2}
 		draw.Draw(canvas, resized.Bounds().Add(off), resized, image.Point{}, draw.Over)
 	}
 
-	if strings.TrimSpace(p.Title) != "" {
-		drawTitle(canvas, p.Title, qrSize, qrSize, titleH)
+	// marco: borde
+	if p.Frame != "none" {
+		fc := p.FrameColor
+		drawRectBorder(canvas, 0, 0, totalW, totalH, 12, 4, fc)
+	}
+	// texto del marco
+	if p.Frame == "banner" && strings.TrimSpace(p.FrameText) != "" {
+		drawTitle(canvas, p.FrameText, totalW, qrSize+framePad*2, frameBottom, p.FrameColor)
+	}
+	// titulo adicional (caption) si hay
+	if strings.TrimSpace(p.Title) != "" && p.Frame == "none" {
+		// sin marco, el titulo va debajo del QR como caption
+		// (se omite si ya hay marco con texto para no duplicar)
 	}
 
 	var buf bytes.Buffer
@@ -243,13 +339,157 @@ func renderPNG(p QRParams, qr *qrcode.QRCode) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func resizeImage(src image.Image, w, h int) *image.RGBA {
-	dst := image.NewRGBA(image.Rect(0, 0, w, h))
-	draw.CatmullRom.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
-	return dst
+func drawModules(canvas *image.RGBA, bm [][]bool, p QRParams, offX, offY, scale, n int) {
+	for y := 0; y < n; y++ {
+		for x := 0; x < n; x++ {
+			if !bm[y][x] {
+				continue
+			}
+			col := moduleColor(p, x, y, n)
+			px := offX + x*scale
+			py := offY + y*scale
+			switch p.Shape {
+			case "dots":
+				cx := px + scale/2
+				cy := py + scale/2
+				r := scale/2 - 1
+				if r < 1 {
+					r = 1
+				}
+				for dy := -r; dy <= r; dy++ {
+					for dx := -r; dx <= r; dx++ {
+						if dx*dx+dy*dy <= r*r {
+							canvas.Set(cx+dx, cy+dy, col)
+						}
+					}
+				}
+			case "rounded":
+				r := scale / 4
+				if r < 1 {
+					r = 1
+				}
+				drawRoundedRect(canvas, px, py, scale, scale, r, col)
+			default:
+				for dy := 0; dy < scale; dy++ {
+					for dx := 0; dx < scale; dx++ {
+						canvas.Set(px+dx, py+dy, col)
+					}
+				}
+			}
+		}
+	}
 }
 
-func drawTitle(dst *image.RGBA, title string, width, yStart, height int) {
+func moduleColor(p QRParams, x, y, n int) color.Color {
+	if p.Gradient == "none" {
+		return p.Fg
+	}
+	t := 0.0
+	switch p.Gradient {
+	case "vertical":
+		if n > 1 {
+			t = float64(y) / float64(n-1)
+		}
+	case "horizontal":
+		if n > 1 {
+			t = float64(x) / float64(n-1)
+		}
+	case "radial":
+		dx := float64(x) - float64(n-1)/2
+		dy := float64(y) - float64(n-1)/2
+		maxd := float64(n) / 2 * 1.414
+		t = math.Sqrt(dx*dx+dy*dy) / maxd
+		if t > 1 {
+			t = 1
+		}
+	}
+	return lerpColor(p.Fg, p.Fg2, t)
+}
+
+func lerpColor(a, b color.RGBA, t float64) color.RGBA {
+	return color.RGBA{
+		R: uint8(float64(a.R)*(1-t) + float64(b.R)*t),
+		G: uint8(float64(a.G)*(1-t) + float64(b.G)*t),
+		B: uint8(float64(a.B)*(1-t) + float64(b.B)*t),
+		A: 255,
+	}
+}
+
+func drawRoundedRect(img *image.RGBA, x, y, w, h, r int, c color.Color) {
+	for dy := 0; dy < h; dy++ {
+		for dx := 0; dx < w; dx++ {
+			if inRoundedRect(dx, dy, w, h, r) {
+				img.Set(x+dx, y+dy, c)
+			}
+		}
+	}
+}
+
+func inRoundedRect(px, py, w, h, r int) bool {
+	if px < 0 || py < 0 || px >= w || py >= h {
+		return false
+	}
+	if r <= 0 {
+		return true
+	}
+	if px >= r && px < w-r {
+		return true
+	}
+	if py >= r && py < h-r {
+		return true
+	}
+	var cx, cy float64
+	left := px < r
+	right := px >= w-r
+	top := py < r
+	bottom := py >= h-r
+	if left && top {
+		cx, cy = float64(r)-0.5, float64(r)-0.5
+	} else if right && top {
+		cx, cy = float64(w)-float64(r)-0.5, float64(r)-0.5
+	} else if left && bottom {
+		cx, cy = float64(r)-0.5, float64(h)-float64(r)-0.5
+	} else if right && bottom {
+		cx, cy = float64(w)-float64(r)-0.5, float64(h)-float64(r)-0.5
+	} else {
+		return true
+	}
+	dx := float64(px) + 0.5 - cx
+	dy := float64(py) + 0.5 - cy
+	return dx*dx+dy*dy <= float64(r)*float64(r)
+}
+
+func drawRectBorder(img *image.RGBA, x, y, w, h, radius, thickness int, c color.Color) {
+	// borde exterior
+	for i := 0; i < thickness; i++ {
+		// top
+		for dx := 0; dx < w; dx++ {
+			if inRoundedRect(dx, i, w, h, radius) && !inRoundedRect(dx, i+1, w, h, radius-thickness+1) {
+				img.Set(x+dx, y+i, c)
+			}
+		}
+		// bottom
+		for dx := 0; dx < w; dx++ {
+			if inRoundedRect(dx, h-1-i, w, h, radius) && !inRoundedRect(dx, h-2-i, w, h, radius-thickness+1) {
+				img.Set(x+dx, y+h-1-i, c)
+			}
+		}
+		// left
+		for dy := 0; dy < h; dy++ {
+			if inRoundedRect(i, dy, w, h, radius) && !inRoundedRect(i+1, dy, w, h, radius-thickness+1) {
+				img.Set(x+i, y+dy, c)
+			}
+		}
+		// right
+		for dy := 0; dy < h; dy++ {
+			if inRoundedRect(w-1-i, dy, w, h, radius) && !inRoundedRect(w-2-i, dy, w, h, radius-thickness+1) {
+				img.Set(x+w-1-i, y+dy, c)
+			}
+		}
+	}
+}
+
+func drawTitle(img *image.RGBA, title string, width, yStart, height int, col color.Color) {
 	f, err := opentype.Parse(fontBytes)
 	if err != nil {
 		return
@@ -260,8 +500,8 @@ func drawTitle(dst *image.RGBA, title string, width, yStart, height int) {
 	}
 	defer face.Close()
 
-	src := image.NewUniform(color.RGBA{0x11, 0x18, 0x27, 255})
-	d := &font.Drawer{Dst: dst, Src: src, Face: face}
+	src := image.NewUniform(col)
+	d := &font.Drawer{Dst: img, Src: src, Face: face}
 	adv := font.MeasureString(face, title)
 	x := (width - adv.Ceil()) / 2
 	if x < 8 {
@@ -272,45 +512,80 @@ func drawTitle(dst *image.RGBA, title string, width, yStart, height int) {
 	d.DrawString(title)
 }
 
+func resizeImage(src image.Image, w, h int) *image.RGBA {
+	dst := image.NewRGBA(image.Rect(0, 0, w, h))
+	draw.CatmullRom.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
+	return dst
+}
+
 func qrToSVG(p QRParams, qr *qrcode.QRCode) string {
 	bm := qr.Bitmap()
 	n := len(bm)
 	quiet := 4
-	total := n + quiet*2
-	scale := p.Size / total
+	scale := p.Size / (n + quiet*2)
 	if scale < 1 {
 		scale = 1
 	}
+	qrSize := scale * (n + quiet*2)
 	offset := quiet * scale
-	qrSize := p.Size
 
-	titleH := 0
-	if strings.TrimSpace(p.Title) != "" {
-		titleH = 48
+	framePad := 0
+	frameBottom := 0
+	if p.Frame != "none" {
+		framePad = 18
+		if p.Frame == "banner" {
+			frameBottom = 44
+		}
 	}
-	totalH := qrSize + titleH
+	totalW := qrSize + framePad*2
+	totalH := qrSize + framePad*2 + frameBottom
 
 	var b strings.Builder
-	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" shape-rendering="crispEdges" font-family="system-ui, -apple-system, sans-serif">`, qrSize, totalH, qrSize, totalH)
-	fmt.Fprintf(&b, `<rect width="%d" height="%d" fill="%s"/>`, qrSize, totalH, colorHex(p.Bg))
+	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" shape-rendering="crispEdges" font-family="system-ui, -apple-system, sans-serif">`, totalW, totalH, totalW, totalH)
+	fmt.Fprintf(&b, `<rect width="%d" height="%d" fill="%s"/>`, totalW, totalH, colorHex(p.Bg))
+
+	// modulos
 	for y := 0; y < n; y++ {
 		for x := 0; x < n; x++ {
-			if bm[y][x] {
-				fmt.Fprintf(&b, `<rect x="%d" y="%d" width="%d" height="%d" fill="%s"/>`, offset+x*scale, offset+y*scale, scale, scale, colorHex(p.Fg))
+			if !bm[y][x] {
+				continue
+			}
+			col := moduleColor(p, x, y, n)
+			px := framePad + offset + x*scale
+			py := framePad + offset + y*scale
+			switch p.Shape {
+			case "dots":
+				cx := px + scale/2
+				cy := py + scale/2
+				r := scale/2 - 1
+				if r < 1 {
+					r = 1
+				}
+				fmt.Fprintf(&b, `<circle cx="%d" cy="%d" r="%d" fill="%s"/>`, cx, cy, r, colorHex(col))
+			case "rounded":
+				r := scale / 4
+				if r < 1 {
+					r = 1
+				}
+				fmt.Fprintf(&b, `<rect x="%d" y="%d" width="%d" height="%d" rx="%d" ry="%d" fill="%s"/>`, px, py, scale, scale, r, r, colorHex(col))
+			default:
+				fmt.Fprintf(&b, `<rect x="%d" y="%d" width="%d" height="%d" fill="%s"/>`, px, py, scale, scale, colorHex(col))
 			}
 		}
 	}
 
-	// logo centrado con pad blanco
+	// logo
 	if p.Logo != nil {
 		logoSize := qrSize / 4
 		if logoSize < 32 {
 			logoSize = 32
 		}
 		pad := logoSize/8 + 6
-		cx, cy := qrSize/2, qrSize/2
-		fmt.Fprintf(&b, `<rect x="%d" y="%d" width="%d" height="%d" fill="%s" rx="4"/>`, cx-logoSize/2-pad, cy-logoSize/2-pad, logoSize+pad*2, logoSize+pad*2, colorHex(p.Bg))
-
+		cx := framePad + qrSize/2
+		cy := framePad + qrSize/2
+		if p.LogoBg {
+			fmt.Fprintf(&b, `<rect x="%d" y="%d" width="%d" height="%d" fill="%s" rx="4"/>`, cx-logoSize/2-pad, cy-logoSize/2-pad, logoSize+pad*2, logoSize+pad*2, colorHex(p.Bg))
+		}
 		resized := resizeImage(p.Logo, logoSize, logoSize)
 		var buf bytes.Buffer
 		if err := png.Encode(&buf, resized); err == nil {
@@ -319,9 +594,18 @@ func qrToSVG(p QRParams, qr *qrcode.QRCode) string {
 		}
 	}
 
-	if strings.TrimSpace(p.Title) != "" {
-		fmt.Fprintf(&b, `<text x="%d" y="%d" text-anchor="middle" font-size="20" fill="%s">%s</text>`, qrSize/2, qrSize+titleH/2+7, colorHex(p.Fg), escapeXML(p.Title))
+	// marco: borde
+	if p.Frame != "none" {
+		fc := p.FrameColor
+		r := 12
+		// rounded rect border (outer + inner)
+		fmt.Fprintf(&b, `<rect x="2" y="2" width="%d" height="%d" rx="%d" ry="%d" fill="none" stroke="%s" stroke-width="4"/>`, totalW-4, totalH-4, r, r, colorHex(fc))
 	}
+	// texto del marco
+	if p.Frame == "banner" && strings.TrimSpace(p.FrameText) != "" {
+		fmt.Fprintf(&b, `<text x="%d" y="%d" text-anchor="middle" font-size="20" font-weight="600" fill="%s">%s</text>`, totalW/2, qrSize+framePad*2+frameBottom/2+7, colorHex(p.FrameColor), escapeXML(p.FrameText))
+	}
+
 	b.WriteString(`</svg>`)
 	return b.String()
 }
@@ -339,7 +623,7 @@ func escapeXML(s string) string {
 	return s
 }
 
-// --- rate limiting por IP ---
+// ---------- rate limiting ----------
 
 type bucket struct {
 	count int
