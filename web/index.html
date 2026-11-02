@@ -551,6 +551,7 @@
 
           <!-- Con sesión: elegir tipo y guardar -->
           <div id="save-logged-in" class="mt-6 hidden">
+            <div id="kind-block">
             <p class="text-[13px] font-semibold text-gray-900">¿Cómo quieres que funcione?</p>
             <p class="mt-1 text-xs leading-relaxed text-gray-500">El contenido y el diseño ya quedaron como los armaste.</p>
 
@@ -574,6 +575,7 @@
                   <span class="mt-0.5 block text-[11px] leading-snug text-gray-500">Código fijo: guarda la información tal cual, sin cambios.</span>
                 </span>
               </button>
+            </div>
             </div>
 
             <div class="mt-4">
@@ -1235,6 +1237,25 @@
     };
   }
 
+  // snapshot de los campos del formulario (para poder restaurarlos al editar)
+  function snapshotInputs() {
+    const out = {};
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+      if (!el.id) return;
+      if (el.type === 'file') return;
+      if (el.type === 'checkbox' || el.type === 'radio') out[el.id] = !!el.checked;
+      else out[el.id] = el.value;
+    });
+    return out;
+  }
+
+  function buildDesign() {
+    const p = buildParams();
+    p.mode = currentMode;
+    p.fields = snapshotInputs();
+    return p;
+  }
+
   function buildGetUrl() {
     const p = buildParams();
     const params = new URLSearchParams({ data: p.data, size: p.size, fg: p.fg, bg: p.bg, level: p.level, format: p.format });
@@ -1422,14 +1443,29 @@
     saveStatus.textContent = 'Guardando…';
     if (btnSave) btnSave.disabled = true;
     try {
-      const res = await fetch('/api/codigos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: selectedKind, name: (codeName ? codeName.value : ''), data: p.data, design: p })
-      });
+      const design = buildDesign();
+      let res;
+      if (editingId) {
+        res = await fetch('/api/codigos/' + editingId, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: (codeName ? codeName.value.trim() : ''), data: p.data, design: design, active: true })
+        });
+      } else {
+        res = await fetch('/api/codigos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind: selectedKind, name: (codeName ? codeName.value.trim() : ''), data: p.data, design: design })
+        });
+      }
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'No se pudo guardar');
-      showSaved(data);
+      if (editingId) {
+        saveStatus.textContent = 'Cambios guardados.';
+        setTimeout(() => { location.href = '/cuenta'; }, 1200);
+      } else {
+        showSaved(data);
+      }
     } catch (e) {
       saveStatus.textContent = e.message;
     } finally {
@@ -1498,10 +1534,108 @@
     });
   }
 
+  // ---------- modo edicion (?edit=ID) ----------
+  const urlParams = new URLSearchParams(location.search);
+  const editIdParam = urlParams.get('edit');
+  let editingId = null;
+
+  function inferMode(data) {
+    const s = String(data || '').trim();
+    if (/^WIFI:/i.test(s)) return 'wifi';
+    if (/^https?:\/\/wa\.me/i.test(s)) return 'whatsapp';
+    if (/^BEGIN:VCARD/i.test(s)) return 'vcard';
+    if (/^mailto:/i.test(s)) return 'email';
+    if (/^tel:/i.test(s)) return 'tel';
+    if (/^sms:/i.test(s)) return 'sms';
+    if (/^geo:/i.test(s)) return 'geo';
+    return 'text';
+  }
+
+  function parseWifi(data) {
+    // WIFI:T:WPA;S:ssid;P:pass;H:true;;
+    const m = String(data).match(/^WIFI:T:([^;]*);S:([^;]*);P:([^;]*);(?:H:([^;]*);)?/i);
+    if (!m) return;
+    const sec = document.getElementById('wifi-sec');
+    if (sec) {
+      for (const o of sec.options) if (o.value === m[1]) { sec.value = m[1]; break; }
+    }
+    const ssid = document.getElementById('wifi-ssid');
+    const pass = document.getElementById('wifi-pass');
+    const hidden = document.getElementById('wifi-hidden');
+    if (ssid) ssid.value = m[2];
+    if (pass) pass.value = m[3];
+    if (hidden) hidden.checked = (m[4] || '').toLowerCase() === 'true';
+  }
+
+  function parseWhatsapp(data) {
+    try {
+      const u = new URL(data);
+      const num = u.pathname.replace(/^\//, '');
+      // cc+num: asumimos que los primeros 1-3 digitos son cc; mejor: guardar cc/num en fields
+      const ccEl = document.getElementById('wa-cc');
+      const numEl = document.getElementById('wa-num');
+      if (numEl) numEl.value = num;
+      const msg = u.searchParams.get('text');
+      const msgEl = document.getElementById('wa-msg');
+      if (msg && msgEl) msgEl.value = decodeURIComponent(msg);
+    } catch (e) { /* se queda el texto */ }
+  }
+
+  async function loadEditMode() {
+    if (!editIdParam) return;
+    if (!sessionUser) { location.href = '/cuenta'; return; }
+    try {
+      const res = await fetch('/api/codigos/' + editIdParam, { headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error('no encontrado');
+      const payload = await res.json();
+      const c = payload.code;
+      editingId = c.id;
+      selectedKind = c.kind;
+
+      let design = {};
+      try { design = JSON.parse(c.design || '{}'); } catch (e) { design = {}; }
+
+      // restaurar campos del formulario
+      const fields = design.fields || {};
+      for (const [k, v] of Object.entries(fields)) {
+        const el = document.getElementById(k);
+        if (!el) continue;
+        if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!v;
+        else el.value = v;
+      }
+      if (design.logo) { logoBase64 = design.logo; if (logoName) logoName.textContent = 'Logo guardado'; if (logoClear) logoClear.classList.remove('hidden'); }
+
+      const mode = design.mode || inferMode(c.data);
+      // fallback de parseo si no hay campos guardados
+      if (!fields || Object.keys(fields).length === 0) {
+        if (mode === 'wifi') parseWifi(c.data);
+        if (mode === 'whatsapp') parseWhatsapp(c.data);
+        if (mode === 'text') {
+          const el = document.getElementById('data-text');
+          if (el) el.value = c.data;
+        }
+      }
+      if (codeName) codeName.value = c.name || '';
+
+      setMode(mode);
+      computeData();
+      if (btnSave) btnSave.textContent = 'Guardar cambios';
+      const sub = document.getElementById('step4-sub');
+      if (sub) sub.textContent = 'Estás editando un código guardado. Ajusta lo que necesites y guarda los cambios.';
+      const kindBlock = document.getElementById('kind-block');
+      if (kindBlock) kindBlock.classList.add('hidden');
+
+      showStep(3);
+    } catch (e) {
+      alert('No se pudo cargar el código para editar.');
+      location.href = '/cuenta';
+    }
+  }
+
   // init
   setMode('text');
   showStep(1);
-  loadSession();
+  loadSession().then(() => { loadEditMode(); });
 
 </script>
 </body>

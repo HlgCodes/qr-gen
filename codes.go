@@ -160,6 +160,31 @@ func handleListCodes(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"codes": out, "base": base})
 }
 
+// ---------- obtener un codigo ----------
+func handleGetCode(w http.ResponseWriter, r *http.Request) {
+	u := currentUser(r)
+	if u == nil {
+		writeErr(w, http.StatusUnauthorized, "inicia sesión")
+		return
+	}
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, "id invalido")
+		return
+	}
+	c, err := codeByID(u.ID, id)
+	if err != nil {
+		writeErr(w, http.StatusNotFound, "ese código no existe")
+		return
+	}
+	base := publicBaseURL(r)
+	writeJSON(w, http.StatusOK, map[string]any{
+		"code":   c,
+		"target": destination(base, c),
+		"base":   base,
+	})
+}
+
 // ---------- editar / borrar ----------
 
 func handleUpdateCode(w http.ResponseWriter, r *http.Request) {
@@ -180,9 +205,10 @@ func handleUpdateCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var in struct {
-		Name   *string `json:"name"`
-		Data   *string `json:"data"`
-		Active *bool   `json:"active"`
+		Name   *string         `json:"name"`
+		Data   *string         `json:"data"`
+		Active *bool           `json:"active"`
+		Design json.RawMessage `json:"design"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&in); err != nil {
 		writeErr(w, http.StatusBadRequest, "datos invalidos")
@@ -217,7 +243,17 @@ func handleUpdateCode(w http.ResponseWriter, r *http.Request) {
 		active = *in.Active
 	}
 
-	if err := updateCode(u.ID, id, name, data, active); err != nil {
+	hasDesign := false
+	designStr := ""
+	if len(in.Design) > 0 {
+		var probe map[string]any
+		if err := json.Unmarshal(in.Design, &probe); err == nil {
+			hasDesign = true
+			designStr = string(in.Design)
+		}
+	}
+
+	if err := updateCode(u.ID, id, name, data, designStr, active, hasDesign); err != nil {
 		writeErr(w, http.StatusNotFound, "ese código no existe")
 		return
 	}

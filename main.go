@@ -42,6 +42,7 @@ func main() {
 	// codigos guardados
 	mux.HandleFunc("GET /api/codigos", handleListCodes)
 	mux.HandleFunc("POST /api/codigos", rateLimit(handleSaveCode, 30))
+	mux.HandleFunc("GET /api/codigos/{id}", handleGetCode)
 	mux.HandleFunc("PATCH /api/codigos/{id}", handleUpdateCode)
 	mux.HandleFunc("DELETE /api/codigos/{id}", handleDeleteCode)
 	mux.HandleFunc("GET /api/codigos/{id}/qr", handleCodeImage)

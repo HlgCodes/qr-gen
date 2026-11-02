@@ -35,7 +35,7 @@ type Code struct {
 	Kind      string `json:"kind"` // "static" | "dynamic"
 	Name      string `json:"name"`
 	Data      string `json:"data"`
-	Design    string `json:"-"`
+	Design    string `json:"design"`
 	Active    bool   `json:"active"`
 	Scans     int64  `json:"scans"`
 	CreatedAt int64  `json:"createdAt"`
@@ -234,9 +234,16 @@ func scanCode(row *sql.Row) (*Code, error) {
 	return &c, nil
 }
 
-func updateCode(userID, id int64, name, data string, active bool) error {
-	res, err := db.Exec(`UPDATE codes SET name = ?, data = ?, active = ?, updated_at = ? WHERE id = ? AND user_id = ?`,
-		name, data, boolToInt(active), time.Now().Unix(), id, userID)
+func updateCode(userID, id int64, name, data, design string, active bool, hasDesign bool) error {
+	q := `UPDATE codes SET name = ?, data = ?, active = ?, updated_at = ?`
+	args := []any{name, data, boolToInt(active), time.Now().Unix()}
+	if hasDesign {
+		q += `, design = ?`
+		args = append(args, design)
+	}
+	q += ` WHERE id = ? AND user_id = ?`
+	args = append(args, id, userID)
+	res, err := db.Exec(q, args...)
 	if err != nil {
 		return err
 	}
