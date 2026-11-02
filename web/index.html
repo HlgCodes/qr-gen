@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Generador de códigos QR gratis — HlgCodes</title>
 <meta name="description" content="Genera códigos QR personalizados: colores, formas, marcos, logo y título. Sin registro, sin marca de agua." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M8 8h6v6H8zM18 8h6v6h-6zM8 18h6v6H8z' fill='white'/%3E%3Crect x='18' y='18' width='2' height='2' fill='white'/%3E%3Crect x='22' y='18' width='2' height='2' fill='white'/%3E%3Crect x='18' y='22' width='2' height='2' fill='white'/%3E%3Crect x='22' y='22' width='2' height='2' fill='white'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a1a'/%3E%3Cpath d='M8 8h6v6H8zM18 8h6v6h-6zM8 18h6v6H8z' fill='white'/%3E%3Crect x='18' y='18' width='2' height='2' fill='white'/%3E%3Crect x='22' y='18' width='2' height='2' fill='white'/%3E%3Crect x='18' y='22' width='2' height='2' fill='white'/%3E%3Crect x='22' y='22' width='2' height='2' fill='white'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -39,6 +39,10 @@
     box-shadow: 0 0 0 3px rgba(26, 26, 26, .1);
   }
   .mode-btn.is-active .mode-icon { background-color: var(--brand-accent); color: #fff; }
+
+  .kind-btn { transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease; }
+  .kind-btn.is-active { border-color: var(--brand-accent); box-shadow: 0 0 0 3px rgba(26, 26, 26, .1); }
+  .kind-btn.is-active .kind-icon { background-color: var(--brand-accent); color: #fff; }
 
   .step-dot { transition: all .18s ease; }
   .step-dot.active { background: var(--brand-accent); color: #fff; border-color: var(--brand-accent); box-shadow: 0 0 0 4px rgba(26, 26, 26, .1); }
@@ -95,7 +99,10 @@
         <span class="text-sm font-semibold tracking-tight">HlgCodes</span>
         <span class="mono rounded-md bg-gray-100 px-1.5 py-0.5 text-[11px] leading-4 text-gray-500">QR</span>
       </a>
-      <a href="https://www.hlgcodes.com" class="mono text-[11px] text-gray-400 transition-colors hover:text-gray-900">hlgcodes.com</a>
+      <div class="flex items-center gap-3">
+        <a href="/cuenta" class="mono text-[11px] font-semibold text-gray-600 transition-colors hover:text-gray-900">Mis códigos</a>
+        <a href="https://www.hlgcodes.com" class="mono hidden text-[11px] text-gray-400 transition-colors hover:text-gray-900 sm:inline">hlgcodes.com</a>
+      </div>
     </div>
   </header>
 
@@ -114,19 +121,26 @@
 
         <!-- Indicador de pasos -->
         <div class="mb-7 flex items-center">
-          <button type="button" data-goto="1" class="flex items-center gap-2">
+          <button type="button" data-goto="1" aria-label="Paso 1: tipo" class="flex items-center gap-2">
             <span data-stepdot="1" class="step-dot active inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-400 sm:h-8 sm:w-8 sm:text-sm">1</span>
-            <span class="text-xs font-semibold text-gray-900 sm:text-[13px]">Tipo</span>
+            <span class="hidden text-xs font-semibold text-gray-900 sm:inline sm:text-[13px]">Tipo</span>
           </button>
-          <span class="mx-3 h-px flex-1 bg-gray-200"></span>
-          <button type="button" data-goto="2" class="flex items-center gap-2">
+          <span class="mx-2 h-px flex-1 bg-gray-200 sm:mx-3"></span>
+          <button type="button" data-goto="2" aria-label="Paso 2: contenido" class="flex items-center gap-2">
             <span data-stepdot="2" class="step-dot inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-400 sm:h-8 sm:w-8 sm:text-sm">2</span>
-            <span class="text-xs font-semibold text-gray-400 sm:text-[13px]">Contenido</span>
+            <span class="hidden text-xs font-semibold text-gray-400 sm:inline sm:text-[13px]">Contenido</span>
           </button>
-          <span class="mx-3 h-px flex-1 bg-gray-200"></span>
-          <button type="button" data-goto="3" class="flex items-center gap-2">
+          <span class="mx-2 h-px flex-1 bg-gray-200 sm:mx-3"></span>
+          <button type="button" data-goto="3" aria-label="Paso 3: diseño" class="flex items-center gap-2">
             <span data-stepdot="3" class="step-dot inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-400 sm:h-8 sm:w-8 sm:text-sm">3</span>
-            <span class="text-xs font-semibold text-gray-400 sm:text-[13px]">Diseño</span>
+            <span class="hidden text-xs font-semibold text-gray-400 sm:inline sm:text-[13px]">Diseño</span>
+          </button>
+          <span class="mx-2 h-px flex-1 bg-gray-200 sm:mx-3"></span>
+          <button type="button" data-goto="4" aria-label="Paso 4: listo" class="flex items-center gap-2">
+            <span data-stepdot="4" class="step-dot inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-400 sm:h-8 sm:w-8 sm:text-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5"><path d="m5 13 4 4L19 7"/></svg>
+            </span>
+            <span class="hidden text-xs font-semibold text-gray-400 sm:inline sm:text-[13px]">Listo</span>
           </button>
         </div>
 
@@ -494,6 +508,111 @@
               Generar QR
             </button>
           </div>
+        </div>
+
+        <!-- ============ PASO 4: LISTO ============ -->
+        <div data-step="4" class="hidden">
+
+          <div class="flex items-start gap-3">
+            <span class="inline-flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-gray-900 text-white">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="m5 13 4 4L19 7"/></svg>
+            </span>
+            <div class="min-w-0">
+              <h2 class="text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">Tu código está listo</h2>
+              <p id="step4-sub" class="mt-1 text-sm leading-relaxed text-gray-500">Descárgalo cuando quieras. Si lo guardas en tu cuenta, lo tienes a mano y puedes cambiar el destino de los dinámicos sin volver a imprimir.</p>
+            </div>
+          </div>
+
+          <!-- Sin sesión: crear cuenta -->
+          <div id="save-logged-out" class="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4 sm:p-5">
+            <div class="flex items-start gap-3">
+              <span class="inline-flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-white text-gray-800 ring-1 ring-gray-200">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <div class="min-w-0">
+                <p class="text-[13px] font-semibold text-gray-900">Guárdalo en tu cuenta</p>
+                <p class="mt-0.5 text-xs leading-relaxed text-gray-500">Es gratis. Tus códigos quedan en un solo lugar y los dinámicos se pueden editar después.</p>
+              </div>
+            </div>
+            <div class="mt-4 space-y-2">
+              <input id="auth-email" type="email" autocomplete="email" inputmode="email" placeholder="tu@correo.com" class="field" />
+              <input id="auth-pass" type="password" autocomplete="current-password" placeholder="Contraseña (mínimo 8 caracteres)" class="field" />
+              <div class="grid gap-2 sm:grid-cols-2">
+                <button type="button" id="btn-register" class="tap inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-black disabled:opacity-40">
+                  Crear cuenta y guardar
+                </button>
+                <button type="button" id="btn-login" class="tap inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40">
+                  Ya tengo cuenta
+                </button>
+              </div>
+            </div>
+            <p id="auth-status" class="mt-2 min-h-[1rem] text-[11px] text-gray-500"></p>
+          </div>
+
+          <!-- Con sesión: elegir tipo y guardar -->
+          <div id="save-logged-in" class="mt-6 hidden">
+            <p class="text-[13px] font-semibold text-gray-900">¿Cómo quieres que funcione?</p>
+            <p class="mt-1 text-xs leading-relaxed text-gray-500">El contenido y el diseño ya quedaron como los armaste.</p>
+
+            <div class="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <button type="button" data-kind="dynamic" class="kind-btn flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-3.5 text-left">
+                <span class="kind-icon inline-flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-gray-100 text-gray-800">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                </span>
+                <span class="min-w-0">
+                  <span class="block text-[13px] font-semibold text-gray-900">Dinámico</span>
+                  <span class="mt-0.5 block text-[11px] leading-snug text-gray-500">Edita el contenido cuando quieras sin cambiar el código.</span>
+                </span>
+              </button>
+
+              <button type="button" data-kind="static" class="kind-btn flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-3.5 text-left">
+                <span class="kind-icon inline-flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-gray-100 text-gray-800">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
+                </span>
+                <span class="min-w-0">
+                  <span class="block text-[13px] font-semibold text-gray-900">Estático</span>
+                  <span class="mt-0.5 block text-[11px] leading-snug text-gray-500">Código fijo: guarda la información tal cual, sin cambios.</span>
+                </span>
+              </button>
+            </div>
+
+            <div class="mt-4">
+              <label for="code-name" class="field-label">Nombre para encontrarlo (opcional)</label>
+              <input id="code-name" type="text" maxlength="80" placeholder="Ej. Menú del restaurante" class="field" />
+            </div>
+
+            <button type="button" id="btn-save" class="tap mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-black disabled:opacity-40">
+              Guardar en mi cuenta
+            </button>
+            <p id="save-status" class="mt-2 min-h-[1rem] text-[11px] text-gray-500"></p>
+          </div>
+
+          <!-- Resultado del guardado -->
+          <div id="save-result" class="mt-4 hidden rounded-2xl border border-gray-200 bg-white p-4">
+            <p class="flex items-center gap-2 text-[13px] font-semibold text-gray-900">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m5 13 4 4L19 7"/></svg>
+              <span id="save-result-title">Guardado</span>
+            </p>
+            <p id="save-result-text" class="mt-1 text-xs leading-relaxed text-gray-500"></p>
+            <div id="save-result-link" class="mt-3 hidden items-center gap-2 rounded-xl bg-gray-50 px-3 py-2">
+              <code id="save-result-url" class="mono min-w-0 flex-1 truncate text-[11px] text-gray-700"></code>
+              <button type="button" id="btn-copy-link" class="tap flex-none rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-50">Copiar</button>
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-2 sm:grid-cols-2">
+            <button type="button" id="btn-download-2" class="tap inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-black">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Descargar el QR
+            </button>
+            <button type="button" id="btn-new" class="tap inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              Crear otro código
+            </button>
+          </div>
+
+          <p class="mt-3 text-center text-[11px] text-gray-400">
+            Los tienes todos en <a href="/cuenta" class="font-semibold text-gray-700 underline underline-offset-2">Mis códigos</a>.
+          </p>
         </div>
 
       </section>
@@ -1083,7 +1202,15 @@
   if (btnBack2) btnBack2.addEventListener('click', () => showStep(1));
   if (btnNext2) btnNext2.addEventListener('click', () => showStep(3));
   if (btnBack3) btnBack3.addEventListener('click', () => showStep(2));
-  if (btnGenerate) btnGenerate.addEventListener('click', generate);
+  if (btnGenerate) btnGenerate.addEventListener('click', async () => {
+    const ok = await generate();
+    if (!ok) {
+      status.textContent = 'Falta el contenido: completa el paso 2.';
+      return;
+    }
+    prepareStep4();
+    showStep(4);
+  });
 
   let timer = null;
   function schedule() { clearTimeout(timer); timer = setTimeout(generate, 300); }
@@ -1124,7 +1251,7 @@
 
   async function generate() {
     const params = buildParams();
-    if (!params.data) { status.textContent = ''; return; }
+    if (!params.data) { status.textContent = ''; return false; }
     status.textContent = 'Generando…';
     try {
       const res = await fetch('/api/qr', {
@@ -1139,21 +1266,30 @@
       downloadBtn.disabled = false;
       copyBtn.disabled = false;
       copyBtn.dataset.url = buildGetUrl();
+      copyBtn.dataset.fallback = copyBtn.dataset.url;
       status.textContent = 'Listo.';
       renderPreview();
+      return true;
     } catch (e) {
       status.textContent = 'Error: ' + e.message;
+      return false;
     }
   }
 
-  downloadBtn.addEventListener('click', async () => {
+  async function downloadQR() {
     try {
       const params = buildParams();
-      const res = await fetch('/api/qr', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params)
-      });
+      let res;
+      if (saved && saved.kind === 'dynamic') {
+        // el QR guardado lleva el enlace corto, no el contenido original
+        res = await fetch('/api/codigos/' + saved.id + '/qr?format=' + encodeURIComponent(params.format || 'png'));
+      } else {
+        res = await fetch('/api/qr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(params)
+        });
+      }
       if (!res.ok) throw new Error(await res.text());
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -1167,17 +1303,206 @@
     } catch (e) {
       status.textContent = 'Error: ' + e.message;
     }
-  });
+  }
+
+  downloadBtn.addEventListener('click', downloadQR);
 
   copyBtn.addEventListener('click', async () => {
-    const url = new URL(copyBtn.dataset.url, window.location.origin).toString();
+    const target = copyBtn.dataset.url || copyBtn.dataset.fallback || '';
+    const url = new URL(target, window.location.origin).toString();
     try { await navigator.clipboard.writeText(url); status.textContent = 'Enlace copiado.'; }
     catch { status.textContent = 'No se pudo copiar.'; }
   });
 
+  // ---------- Paso 4: cuenta y guardado ----------
+  const saveLoggedOut = document.getElementById('save-logged-out');
+  const saveLoggedIn = document.getElementById('save-logged-in');
+  const saveResult = document.getElementById('save-result');
+  const saveResultLink = document.getElementById('save-result-link');
+  const saveResultUrl = document.getElementById('save-result-url');
+  const saveResultTitle = document.getElementById('save-result-title');
+  const saveResultText = document.getElementById('save-result-text');
+  const authEmail = document.getElementById('auth-email');
+  const authPass = document.getElementById('auth-pass');
+  const authStatus = document.getElementById('auth-status');
+  const saveStatus = document.getElementById('save-status');
+  const codeName = document.getElementById('code-name');
+  const btnRegister = document.getElementById('btn-register');
+  const btnLogin = document.getElementById('btn-login');
+  const btnSave = document.getElementById('btn-save');
+  const btnNew = document.getElementById('btn-new');
+  const btnDownload2 = document.getElementById('btn-download-2');
+  const btnCopyLink = document.getElementById('btn-copy-link');
+
+  let sessionUser = null;
+  let selectedKind = 'dynamic';
+  let saved = null;
+
+  function setKind(kind) {
+    selectedKind = kind;
+    document.querySelectorAll('.kind-btn').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.kind === kind);
+    });
+  }
+  document.querySelectorAll('.kind-btn').forEach(b => b.addEventListener('click', () => setKind(b.dataset.kind)));
+
+  function setSession(user) {
+    sessionUser = user || null;
+    if (saveLoggedOut) saveLoggedOut.classList.toggle('hidden', !!sessionUser);
+    if (saveLoggedIn) saveLoggedIn.classList.toggle('hidden', !sessionUser);
+  }
+
+  async function loadSession() {
+    try {
+      const res = await fetch('/api/auth/me', { headers: { Accept: 'application/json' } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setSession(data.user);
+    } catch (e) { /* sin sesión: se puede descargar igual */ }
+  }
+
+  function suggestName(data) {
+    let s = String(data || '').trim();
+    if (!s) return '';
+    if (/^https?:\/\//i.test(s)) {
+      try {
+        const u = new URL(s);
+        s = (u.host + u.pathname).replace(/^www\./, '').replace(/\/$/, '');
+      } catch (e) { /* se queda el texto */ }
+    }
+    s = s.replace(/\s+/g, ' ');
+    return s.length > 40 ? s.slice(0, 40) + '…' : s;
+  }
+
+  function prepareStep4() {
+    saved = null;
+    if (saveResult) saveResult.classList.add('hidden');
+    if (saveResultLink) { saveResultLink.classList.add('hidden'); saveResultLink.classList.remove('flex'); }
+    if (saveStatus) saveStatus.textContent = '';
+    if (authStatus) authStatus.textContent = '';
+    if (codeName) codeName.value = suggestName(document.getElementById('data').value);
+    setKind(selectedKind);
+  }
+
+  async function authAction(path) {
+    if (!authEmail || !authPass) return;
+    const email = authEmail.value.trim();
+    const pass = authPass.value;
+    if (!email || !pass) { authStatus.textContent = 'Escribe tu correo y una contraseña.'; return; }
+    authStatus.textContent = 'Un momento…';
+    btnRegister.disabled = true;
+    btnLogin.disabled = true;
+    try {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: pass })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo completar');
+      setSession({ email: data.email });
+      authPass.value = '';
+      authStatus.textContent = '';
+      await saveCode();
+    } catch (e) {
+      authStatus.textContent = e.message;
+    } finally {
+      btnRegister.disabled = false;
+      btnLogin.disabled = false;
+    }
+  }
+
+  if (btnRegister) btnRegister.addEventListener('click', () => authAction('/api/auth/registro'));
+  if (btnLogin) btnLogin.addEventListener('click', () => authAction('/api/auth/login'));
+
+  async function saveCode() {
+    if (!sessionUser) { setSession(null); return; }
+    const p = buildParams();
+    if (!p.data) { saveStatus.textContent = 'Falta el contenido del código.'; return; }
+    saveStatus.textContent = 'Guardando…';
+    if (btnSave) btnSave.disabled = true;
+    try {
+      const res = await fetch('/api/codigos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: selectedKind, name: (codeName ? codeName.value : ''), data: p.data, design: p })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo guardar');
+      showSaved(data);
+    } catch (e) {
+      saveStatus.textContent = e.message;
+    } finally {
+      if (btnSave) btnSave.disabled = false;
+    }
+  }
+
+  if (btnSave) btnSave.addEventListener('click', saveCode);
+
+  function showSaved(data) {
+    saved = data;
+    if (saveStatus) saveStatus.textContent = '';
+    if (saveResult) saveResult.classList.remove('hidden');
+    if (data.kind === 'dynamic') {
+      if (saveResultTitle) saveResultTitle.textContent = 'Guardado como dinámico';
+      if (saveResultText) saveResultText.textContent = 'Este es el enlace que lleva el QR. Puedes cambiarlo cuando quieras desde Mis códigos y el código ya impreso seguirá funcionando.';
+      if (saveResultUrl) saveResultUrl.textContent = data.url;
+      if (saveResultLink) { saveResultLink.classList.remove('hidden'); saveResultLink.classList.add('flex'); }
+      copyBtn.disabled = false;
+      copyBtn.dataset.url = data.url;
+      // el QR definitivo lleva el enlace corto, no el contenido original
+      preview.src = '/api/codigos/' + data.id + '/qr?size=512';
+      preview.classList.remove('hidden');
+      placeholder.classList.add('hidden');
+      if (previewCaption) previewCaption.textContent = 'Este QR ya lleva el enlace corto.';
+    } else {
+      if (saveResultTitle) saveResultTitle.textContent = 'Guardado como estático';
+      if (saveResultText) saveResultText.textContent = 'El QR guarda la información tal cual. Si algún día cambia, tendrás que crear un código nuevo.';
+      if (saveResultLink) { saveResultLink.classList.add('hidden'); saveResultLink.classList.remove('flex'); }
+    }
+  }
+
+  if (btnCopyLink) {
+    btnCopyLink.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(saveResultUrl.textContent);
+        btnCopyLink.textContent = 'Copiado';
+        setTimeout(() => { btnCopyLink.textContent = 'Copiar'; }, 1500);
+      } catch (e) { btnCopyLink.textContent = 'No se pudo'; }
+    });
+  }
+
+  if (btnDownload2) btnDownload2.addEventListener('click', downloadQR);
+
+  if (btnNew) {
+    btnNew.addEventListener('click', () => {
+      // empezar de cero: se conserva el diseño, no el contenido
+      const textEl = document.getElementById('data-text');
+      if (textEl) textEl.value = '';
+      if (codeName) codeName.value = '';
+      saved = null;
+      if (saveResult) saveResult.classList.add('hidden');
+      if (saveResultLink) { saveResultLink.classList.add('hidden'); saveResultLink.classList.remove('flex'); }
+      if (saveStatus) saveStatus.textContent = '';
+      if (authStatus) authStatus.textContent = '';
+      preview.removeAttribute('src');
+      preview.classList.add('hidden');
+      placeholder.classList.remove('hidden');
+      downloadBtn.disabled = true;
+      copyBtn.disabled = true;
+      copyBtn.dataset.url = '';
+      status.textContent = '';
+      setKind('dynamic');
+      setMode('text');
+      showStep(1);
+    });
+  }
+
   // init
   setMode('text');
   showStep(1);
+  loadSession();
+
 </script>
 </body>
 </html>

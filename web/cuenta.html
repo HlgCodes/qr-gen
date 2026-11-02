@@ -1,0 +1,352 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mis códigos QR — HlgCodes</title>
+<meta name="description" content="Consulta, edita y descarga los códigos QR que guardaste en tu cuenta." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a1a1a'/%3E%3Cpath d='M8 8h6v6H8zM18 8h6v6h-6zM8 18h6v6H8z' fill='white'/%3E%3Crect x='18' y='18' width='2' height='2' fill='white'/%3E%3Crect x='22' y='18' width='2' height='2' fill='white'/%3E%3Crect x='18' y='22' width='2' height='2' fill='white'/%3E%3Crect x='22' y='22' width='2' height='2' fill='white'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .field { width:100%; border-radius:0.75rem; border:1px solid #e5e7eb; background:#fff; padding:0.625rem 0.75rem; font-size:0.875rem; color:#111827; }
+  .field:focus { outline:none; border-color:#1a1a1a; box-shadow:0 0 0 3px rgba(26,26,26,.1); }
+  .field-label { display:block; font-size:0.75rem; font-weight:500; color:#6b7280; margin-bottom:0.25rem; }
+  .tap { min-height:44px; }
+  .card { transition: box-shadow .16s ease, border-color .16s ease; }
+  .card:hover { box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .skeleton { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.6} 50%{opacity:.3} }
+</style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+
+<header class="sticky top-0 z-20 border-b border-gray-200/80 bg-white/85 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+    <a href="/" class="flex items-center gap-2.5">
+      <span class="mono inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-xs font-bold text-white">&gt;</span>
+      <span class="text-sm font-semibold tracking-tight">HlgCodes</span>
+      <span class="mono rounded-md bg-gray-100 px-1.5 py-0.5 text-[11px] leading-4 text-gray-500">QR</span>
+    </a>
+    <a href="/" class="mono text-[11px] text-gray-500 transition-colors hover:text-gray-900">← Crear código</a>
+  </div>
+</header>
+
+<main class="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:pt-10">
+
+  <!-- Sin sesión -->
+  <section id="auth" class="hidden">
+    <div class="mx-auto max-w-sm">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Inicia sesión</h1>
+        <p class="mt-1 text-sm text-gray-500">Para ver los códigos que guardaste.</p>
+      </div>
+      <div class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+        <div class="space-y-2">
+          <div>
+            <label class="field-label" for="a-email">Correo</label>
+            <input id="a-email" type="email" autocomplete="email" placeholder="tu@correo.com" class="field" />
+          </div>
+          <div>
+            <label class="field-label" for="a-pass">Contraseña</label>
+            <input id="a-pass" type="password" autocomplete="current-password" placeholder="Mínimo 8 caracteres" class="field" />
+          </div>
+        </div>
+        <div class="mt-4 grid gap-2 sm:grid-cols-2">
+          <button type="button" id="a-register" class="tap inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-black disabled:opacity-40">
+            Crear cuenta
+          </button>
+          <button type="button" id="a-login" class="tap inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40">
+            Entrar
+          </button>
+        </div>
+        <p id="a-status" class="mt-3 min-h-[1rem] text-[11px] text-gray-500"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Con sesión -->
+  <section id="dashboard" class="hidden">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="mono text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Tu cuenta</p>
+        <h1 class="mt-1 text-2xl font-bold tracking-tight text-gray-900">Mis códigos</h1>
+        <p id="welcome" class="mt-1 text-sm text-gray-500"></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/" class="tap inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-black">
+          + Nuevo código
+        </a>
+        <button type="button" id="btn-logout" class="tap inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          Salir
+        </button>
+      </div>
+    </div>
+
+    <div id="empty" class="hidden rounded-3xl border border-dashed border-gray-300 bg-white p-10 text-center">
+      <p class="text-[13px] font-semibold text-gray-900">Todavía no guardas ningún código</p>
+      <p class="mt-1 text-sm text-gray-500">Genera uno y guárdalo para tenerlo siempre a mano.</p>
+      <a href="/" class="mt-4 inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-black">Crear mi primer código</a>
+    </div>
+
+    <div id="list" class="grid grid-cols-1 gap-3 sm:grid-cols-2"></div>
+  </section>
+
+</main>
+
+<footer class="border-t border-gray-200 bg-white">
+  <div class="mx-auto max-w-5xl px-4 py-6 text-center">
+    <p class="mono text-[11px] text-gray-400">© HlgCodes — mis códigos QR</p>
+  </div>
+</footer>
+
+<script>
+  const listEl = document.getElementById('list');
+  const emptyEl = document.getElementById('empty');
+  const authEl = document.getElementById('auth');
+  const dashEl = document.getElementById('dashboard');
+  const welcomeEl = document.getElementById('welcome');
+  const aEmail = document.getElementById('a-email');
+  const aPass = document.getElementById('a-pass');
+  const aStatus = document.getElementById('a-status');
+  const aRegister = document.getElementById('a-register');
+  const aLogin = document.getElementById('a-login');
+  const btnLogout = document.getElementById('btn-logout');
+
+  let me = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  function fmtDate(ts) {
+    try {
+      const d = new Date(ts * 1000);
+      return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' });
+    } catch (e) { return ''; }
+  }
+
+  async function loadMe() {
+    try {
+      const res = await fetch('/api/auth/me', { headers: { Accept: 'application/json' } });
+      const data = await res.json();
+      me = data.user;
+    } catch (e) { me = null; }
+    if (!me) {
+      authEl.classList.remove('hidden');
+      dashEl.classList.add('hidden');
+    } else {
+      authEl.classList.add('hidden');
+      dashEl.classList.remove('hidden');
+      welcomeEl.textContent = me.email;
+      await loadCodes();
+    }
+  }
+
+  async function authAction(path) {
+    const email = aEmail.value.trim();
+    const pass = aPass.value;
+    if (!email || !pass) { aStatus.textContent = 'Escribe tu correo y tu contraseña.'; return; }
+    aStatus.textContent = 'Un momento…';
+    aRegister.disabled = true;
+    aLogin.disabled = true;
+    try {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: pass })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo completar');
+      aPass.value = '';
+      aStatus.textContent = '';
+      await loadMe();
+    } catch (e) {
+      aStatus.textContent = e.message;
+    } finally {
+      aRegister.disabled = false;
+      aLogin.disabled = false;
+    }
+  }
+
+  aRegister.addEventListener('click', () => authAction('/api/auth/registro'));
+  aLogin.addEventListener('click', () => authAction('/api/auth/login'));
+
+  btnLogout.addEventListener('click', async () => {
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+    me = null;
+    loadMe();
+  });
+
+  async function loadCodes() {
+    listEl.innerHTML = '';
+    emptyEl.classList.add('hidden');
+    try {
+      const res = await fetch('/api/codigos', { headers: { Accept: 'application/json' } });
+      const data = await res.json();
+      const codes = data.codes || [];
+      if (!codes.length) { emptyEl.classList.remove('hidden'); return; }
+      for (const c of codes) renderCode(c);
+    } catch (e) {
+      listEl.innerHTML = '<p class="text-sm text-red-600">No se pudieron cargar tus códigos.</p>';
+    }
+  }
+
+  function renderCode(c) {
+    const card = document.createElement('article');
+    card.className = 'card rounded-2xl border border-gray-200 bg-white p-4';
+    card.dataset.id = c.id;
+    const kindLabel = c.kind === 'dynamic' ? 'Dinámico' : 'Estático';
+    const kindBadge = c.kind === 'dynamic'
+      ? '<span class="mono rounded-md bg-gray-900 px-1.5 py-0.5 text-[10px] font-semibold text-white">Dinámico</span>'
+      : '<span class="mono rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-700">Estático</span>';
+
+    card.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="relative flex-none">
+          <img src="/api/codigos/${c.id}/qr?size=128&format=png" alt="QR ${esc(c.name)}" class="h-20 w-20 rounded-xl ring-1 ring-gray-200 bg-white" />
+          ${!c.active ? '<span class="absolute -right-1 -top-1 rounded-full bg-gray-500 px-1.5 py-0.5 text-[9px] font-semibold text-white">Pausado</span>' : ''}
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-start justify-between gap-2">
+            <p class="truncate text-[13px] font-semibold text-gray-900">${esc(c.name)}</p>
+            ${kindBadge}
+          </div>
+          <p class="mt-0.5 truncate text-[11px] text-gray-500">${esc(c.kind === 'dynamic' ? c.target : c.data)}</p>
+          <p class="mono mt-1 text-[10px] text-gray-400">${fmtDate(c.createdAt)} · ${c.scans} escaneos</p>
+        </div>
+      </div>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button type="button" data-act="download" class="tap inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+          Descargar
+        </button>
+        ${c.kind === 'dynamic' ? `
+        <button type="button" data-act="copy" class="tap inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Copiar enlace
+        </button>
+        <button type="button" data-act="edit" class="tap inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Editar destino
+        </button>` : ''}
+        <button type="button" data-act="toggle" class="tap inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-50">
+          ${c.active ? 'Pausar' : 'Activar'}
+        </button>
+        <button type="button" data-act="delete" class="tap inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-medium text-gray-500 transition-colors hover:text-red-600">
+          Borrar
+        </button>
+      </div>
+
+      ${c.kind === 'dynamic' ? `
+      <div data-editbox class="mt-3 hidden rounded-xl border border-gray-200 bg-gray-50 p-3">
+        <label class="field-label">Nuevo destino</label>
+        <input data-editinput type="text" value="${esc(c.data)}" class="field" />
+        <div class="mt-2 flex items-center gap-2">
+          <button type="button" data-act="save-edit" class="tap inline-flex items-center justify-center rounded-lg bg-gray-900 px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-black">Guardar</button>
+          <button type="button" data-act="cancel-edit" class="tap inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-medium text-gray-700 transition-colors hover:bg-gray-50">Cancelar</button>
+          <span data-editstatus class="text-[10px] text-gray-500"></span>
+        </div>
+      </div>` : ''}
+    `;
+
+    // eventos
+    card.querySelectorAll('[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => handleAction(btn.dataset.act, c, card));
+    });
+
+    listEl.appendChild(card);
+  }
+
+  async function handleAction(act, c, card) {
+    if (act === 'download') {
+      const a = document.createElement('a');
+      a.href = '/api/codigos/' + c.id + '/qr?format=png';
+      a.download = 'qr.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      return;
+    }
+    if (act === 'copy') {
+      // busca el enlace corto del codigo
+      try {
+        const res = await fetch('/api/codigos', { headers: { Accept: 'application/json' } });
+        const data = await res.json();
+        const fresh = (data.codes || []).find(x => x.id === c.id);
+        if (fresh && fresh.target) await navigator.clipboard.writeText(fresh.target);
+      } catch (e) {}
+      return;
+    }
+    if (act === 'edit') {
+      const box = card.querySelector('[data-editbox]');
+      if (box) box.classList.remove('hidden');
+      return;
+    }
+    if (act === 'cancel-edit') {
+      const box = card.querySelector('[data-editbox]');
+      if (box) box.classList.add('hidden');
+      return;
+    }
+    if (act === 'save-edit') {
+      const box = card.querySelector('[data-editbox]');
+      const input = card.querySelector('[data-editinput]');
+      const st = card.querySelector('[data-editstatus]');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) { st.textContent = 'No puede quedar vacío.'; return; }
+      st.textContent = 'Guardando…';
+      try {
+        const res = await fetch('/api/codigos/' + c.id, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: val })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'No se pudo guardar');
+        st.textContent = 'Guardado';
+        // refresca la miniatura y el texto
+        const img = card.querySelector('img');
+        if (img) img.src = '/api/codigos/' + c.id + '/qr?size=128&format=png&_=' + Date.now();
+        const p = card.querySelector('p.mt-0\\.5');
+        if (p) p.textContent = val;
+        setTimeout(() => { if (box) box.classList.add('hidden'); }, 700);
+      } catch (e) {
+        st.textContent = e.message;
+      }
+      return;
+    }
+    if (act === 'toggle') {
+      try {
+        const res = await fetch('/api/codigos/' + c.id, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active: !c.active })
+        });
+        if (!res.ok) throw new Error();
+        await loadCodes();
+      } catch (e) {}
+      return;
+    }
+    if (act === 'delete') {
+      if (!confirm('¿Borrar este código? No se puede deshacer.')) return;
+      try {
+        const res = await fetch('/api/codigos/' + c.id, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        await loadCodes();
+      } catch (e) {}
+      return;
+    }
+  }
+
+  loadMe();
+</script>
+</body>
+</html>

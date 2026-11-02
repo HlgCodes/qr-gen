@@ -92,8 +92,27 @@ func decodeLogo(b64str string) (image.Image, error) {
 	return img, nil
 }
 
-func paramsFromRequest(r *http.Request) (QRParams, error) {
-	p := QRParams{
+// designPayload es el diseno tal como lo manda el navegador (JSON).
+type designPayload struct {
+	Data       string `json:"data"`
+	Size       int    `json:"size"`
+	Fg         string `json:"fg"`
+	Fg2        string `json:"fg2"`
+	Bg         string `json:"bg"`
+	Level      string `json:"level"`
+	Format     string `json:"format"`
+	Title      string `json:"title"`
+	Shape      string `json:"shape"`
+	Frame      string `json:"frame"`
+	FrameText  string `json:"frameText"`
+	FrameColor string `json:"frameColor"`
+	Gradient   string `json:"gradient"`
+	LogoBg     *bool  `json:"logoBg"`
+	Logo       string `json:"logo"`
+}
+
+func defaultParams() QRParams {
+	return QRParams{
 		Size:       512,
 		Fg:         color.RGBA{0, 0, 0, 255},
 		Fg2:        color.RGBA{0, 0, 0, 255},
@@ -107,6 +126,87 @@ func paramsFromRequest(r *http.Request) (QRParams, error) {
 		Gradient:   "none",
 		LogoBg:     true,
 	}
+}
+
+// applyDesign vuelca el diseno recibido sobre los parametros.
+func applyDesign(p *QRParams, body designPayload) {
+	if body.Data != "" {
+		p.Data = body.Data
+	}
+	if body.Size != 0 {
+		p.Size = body.Size
+	}
+	if body.Fg != "" {
+		p.Fg = parseColor(body.Fg, p.Fg)
+	}
+	if body.Fg2 != "" {
+		p.Fg2 = parseColor(body.Fg2, p.Fg2)
+	}
+	if body.Bg != "" {
+		p.Bg = parseColor(body.Bg, p.Bg)
+	}
+	if body.Level != "" {
+		p.Level = parseLevel(body.Level)
+	}
+	if body.Format != "" {
+		p.Format = strings.ToLower(body.Format)
+	}
+	if body.Title != "" {
+		p.Title = body.Title
+	}
+	if body.Shape != "" {
+		p.Shape = strings.ToLower(body.Shape)
+	}
+	if body.Frame != "" {
+		p.Frame = strings.ToLower(body.Frame)
+	}
+	if body.FrameText != "" {
+		p.FrameText = body.FrameText
+	}
+	if body.FrameColor != "" {
+		p.FrameColor = parseColor(body.FrameColor, p.FrameColor)
+	}
+	if body.Gradient != "" {
+		p.Gradient = strings.ToLower(body.Gradient)
+	}
+	if body.LogoBg != nil {
+		p.LogoBg = *body.LogoBg
+	}
+	if body.Logo != "" {
+		p.LogoB64 = body.Logo
+	}
+}
+
+// finalizeParams valida y normaliza.
+func finalizeParams(p *QRParams) error {
+	p.Data = strings.TrimSpace(p.Data)
+	if p.Data == "" {
+		return fmt.Errorf("falta el texto o la URL")
+	}
+	if p.Size < 64 {
+		p.Size = 64
+	}
+	if p.Size > 2048 {
+		p.Size = 2048
+	}
+	if p.Format != "svg" {
+		p.Format = "png"
+	}
+	if p.LogoB64 != "" {
+		img, err := decodeLogo(p.LogoB64)
+		if err != nil {
+			return err
+		}
+		p.Logo = img
+		if p.Level == qrcode.Medium {
+			p.Level = qrcode.Highest
+		}
+	}
+	return nil
+}
+
+func paramsFromRequest(r *http.Request) (QRParams, error) {
+	p := defaultParams()
 	q := r.URL.Query()
 	if v := q.Get("data"); v != "" {
 		p.Data = v
@@ -157,94 +257,33 @@ func paramsFromRequest(r *http.Request) (QRParams, error) {
 	}
 
 	if r.Method == http.MethodPost && r.Body != nil {
-		var body struct {
-			Data       string `json:"data"`
-			Size       int    `json:"size"`
-			Fg         string `json:"fg"`
-			Fg2        string `json:"fg2"`
-			Bg         string `json:"bg"`
-			Level      string `json:"level"`
-			Format     string `json:"format"`
-			Title      string `json:"title"`
-			Shape      string `json:"shape"`
-			Frame      string `json:"frame"`
-			FrameText  string `json:"frameText"`
-			FrameColor string `json:"frameColor"`
-			Gradient   string `json:"gradient"`
-			LogoBg     *bool  `json:"logoBg"`
-			Logo       string `json:"logo"`
-		}
+		var body designPayload
 		if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
-			if body.Data != "" {
-				p.Data = body.Data
-			}
-			if body.Size != 0 {
-				p.Size = body.Size
-			}
-			if body.Fg != "" {
-				p.Fg = parseColor(body.Fg, p.Fg)
-			}
-			if body.Fg2 != "" {
-				p.Fg2 = parseColor(body.Fg2, p.Fg2)
-			}
-			if body.Bg != "" {
-				p.Bg = parseColor(body.Bg, p.Bg)
-			}
-			if body.Level != "" {
-				p.Level = parseLevel(body.Level)
-			}
-			if body.Format != "" {
-				p.Format = strings.ToLower(body.Format)
-			}
-			if body.Title != "" {
-				p.Title = body.Title
-			}
-			if body.Shape != "" {
-				p.Shape = strings.ToLower(body.Shape)
-			}
-			if body.Frame != "" {
-				p.Frame = strings.ToLower(body.Frame)
-			}
-			if body.FrameText != "" {
-				p.FrameText = body.FrameText
-			}
-			if body.FrameColor != "" {
-				p.FrameColor = parseColor(body.FrameColor, p.FrameColor)
-			}
-			if body.Gradient != "" {
-				p.Gradient = strings.ToLower(body.Gradient)
-			}
-			if body.LogoBg != nil {
-				p.LogoBg = *body.LogoBg
-			}
-			if body.Logo != "" {
-				p.LogoB64 = body.Logo
-			}
+			applyDesign(&p, body)
 		}
 	}
 
-	p.Data = strings.TrimSpace(p.Data)
-	if p.Data == "" {
-		return p, fmt.Errorf("falta el texto o la URL")
+	if err := finalizeParams(&p); err != nil {
+		return p, err
 	}
-	if p.Size < 64 {
-		p.Size = 64
-	}
-	if p.Size > 2048 {
-		p.Size = 2048
-	}
-	if p.Format != "svg" {
-		p.Format = "png"
-	}
-	if p.LogoB64 != "" {
-		img, err := decodeLogo(p.LogoB64)
-		if err != nil {
-			return p, err
+	return p, nil
+}
+
+// paramsFromDesign reconstruye el diseno guardado en la cuenta.
+func paramsFromDesign(raw, data string) (QRParams, error) {
+	p := defaultParams()
+	if strings.TrimSpace(raw) != "" {
+		var body designPayload
+		if err := json.Unmarshal([]byte(raw), &body); err != nil {
+			return p, fmt.Errorf("diseno guardado invalido")
 		}
-		p.Logo = img
-		if p.Level == qrcode.Medium {
-			p.Level = qrcode.Highest
-		}
+		applyDesign(&p, body)
+	}
+	if data != "" {
+		p.Data = data
+	}
+	if err := finalizeParams(&p); err != nil {
+		return p, err
 	}
 	return p, nil
 }

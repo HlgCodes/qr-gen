@@ -8,18 +8,26 @@ import (
 	"strings"
 )
 
-//go:embed web/index.html
+//go:embed web/index.html web/cuenta.html
 var webFS embed.FS
 
-func handleIndex(w http.ResponseWriter, r *http.Request) {
-	data, err := webFS.ReadFile("web/index.html")
+func servePage(w http.ResponseWriter, name string) {
+	data, err := webFS.ReadFile(name)
 	if err != nil {
-		http.Error(w, "index not found", http.StatusInternalServerError)
+		http.Error(w, "pagina no encontrada", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Cache-Control", "public, max-age=300")
+	w.Header().Set("Cache-Control", "no-cache")
 	w.Write(data)
+}
+
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	servePage(w, "web/index.html")
+}
+
+func handleCuentaPage(w http.ResponseWriter, r *http.Request) {
+	servePage(w, "web/cuenta.html")
 }
 
 func handleQR(w http.ResponseWriter, r *http.Request) {
