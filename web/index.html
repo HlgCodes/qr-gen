@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Generador de códigos QR gratis — HlgCodes</title>
+<meta name="description" content="Genera códigos QR personalizados: colores, tamaño, corrección de error y formato PNG o SVG. Sin registro, sin marca de agua opcional." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111827'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='14' fill='white'%3EQR%3C/text%3E%3C/svg%3E" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+  .qr-preview { image-rendering: pixelated; }
+</style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+  <header class="border-b border-gray-200 bg-white">
+    <div class="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-900 text-white mono text-xs font-bold">&gt;</span>
+        <span class="font-semibold tracking-tight">HlgCodes</span>
+        <span class="mono text-xs text-gray-400">/ qr</span>
+      </a>
+      <nav class="mono text-xs text-gray-500">
+        <a href="https://www.hlgcodes.com" class="hover:text-gray-900">hlgcodes.com</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-10">
+    <div class="mb-8">
+      <p class="mono text-[11px] font-semibold tracking-widest text-blue-600 uppercase">Herramienta gratuita</p>
+      <h1 class="mt-2 text-3xl md:text-4xl font-bold tracking-tight">Generador de códigos QR</h1>
+      <p class="mt-2 text-gray-600 max-w-2xl">Pega un enlace o un texto, personaliza colores y tamaño, y descarga tu código QR. Sin registro, sin marca de agua.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Formulario -->
+      <section class="rounded-lg bg-white p-6 ring-1 ring-gray-200 shadow-sm">
+        <form id="qr-form" class="space-y-5">
+          <div>
+            <label for="data" class="block text-sm font-medium text-gray-700 mb-1">Texto o URL</label>
+            <textarea id="data" name="data" rows="3" required placeholder="https://www.hlgcodes.com"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="size" class="block text-sm font-medium text-gray-700 mb-1">Tamaño (px)</label>
+              <input id="size" name="size" type="number" min="64" max="2048" value="512"
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="level" class="block text-sm font-medium text-gray-700 mb-1">Corrección de error</label>
+              <select id="level" name="level"
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <option value="L">Baja (L)</option>
+                <option value="M" selected>Media (M)</option>
+                <option value="Q">Alta (Q)</option>
+                <option value="H">Máxima (H)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="fg" class="block text-sm font-medium text-gray-700 mb-1">Color del código</label>
+              <div class="flex items-center gap-2">
+                <input id="fg" name="fg" type="color" value="#111827"
+                  class="h-9 w-12 cursor-pointer rounded border border-gray-300" />
+                <input id="fg-hex" type="text" value="#111827" maxlength="7"
+                  class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div>
+              <label for="bg" class="block text-sm font-medium text-gray-700 mb-1">Color de fondo</label>
+              <div class="flex items-center gap-2">
+                <input id="bg" name="bg" type="color" value="#ffffff"
+                  class="h-9 w-12 cursor-pointer rounded border border-gray-300" />
+                <input id="bg-hex" type="text" value="#ffffff" maxlength="7"
+                  class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Formato</label>
+            <div class="flex gap-3">
+              <label class="flex items-center gap-2 text-sm">
+                <input type="radio" name="format" value="png" checked class="accent-blue-600" /> PNG
+              </label>
+              <label class="flex items-center gap-2 text-sm">
+                <input type="radio" name="format" value="svg" class="accent-blue-600" /> SVG
+              </label>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-2">
+            <button type="submit"
+              class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700">
+              Generar
+            </button>
+            <button type="button" id="download-btn" disabled
+              class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              Descargar
+            </button>
+            <button type="button" id="copy-btn" disabled
+              class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+              Copiar enlace
+            </button>
+          </div>
+        </form>
+        <p id="status" class="mt-3 mono text-xs text-gray-500"></p>
+      </section>
+
+      <!-- Vista previa -->
+      <section class="rounded-lg bg-white p-6 ring-1 ring-gray-200 shadow-sm flex flex-col items-center justify-center">
+        <div class="w-full max-w-sm">
+          <div class="aspect-square w-full rounded-md bg-gray-100 ring-1 ring-gray-200 flex items-center justify-center overflow-hidden">
+            <img id="preview" alt="Vista previa del código QR" class="qr-preview max-w-full max-h-full" />
+            <span id="placeholder" class="mono text-xs text-gray-400">La vista previa aparece aquí</span>
+          </div>
+          <p class="mt-3 mono text-[11px] text-gray-400 text-center">Escanea con la cámara de tu teléfono para probar.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="mt-12 rounded-lg bg-white p-6 ring-1 ring-gray-200">
+      <h2 class="font-semibold text-gray-900">Cómo usar el enlace directo</h2>
+      <p class="mt-2 text-sm text-gray-600">También puedes generar un QR sin abrir la página, útil para integrarlo en tus propios sistemas:</p>
+      <pre class="mt-3 overflow-x-auto rounded-md bg-gray-900 p-4 text-xs text-gray-100 mono">GET /api/qr?data=https://ejemplo.com&size=512&fg=%23111827&bg=%23ffffff&level=M&format=png</pre>
+      <p class="mt-2 text-sm text-gray-600">Parámetros: <span class="mono text-xs">data</span> (texto o URL), <span class="mono text-xs">size</span> (64-2048), <span class="mono text-xs">fg</span>, <span class="mono text-xs">bg</span> (hex), <span class="mono text-xs">level</span> (L/M/Q/H), <span class="mono text-xs">format</span> (png/svg).</p>
+    </section>
+  </main>
+
+  <footer class="border-t border-gray-200 bg-white mt-12">
+    <div class="mx-auto max-w-5xl px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-2">
+      <p class="mono text-xs text-gray-400">© HlgCodes — herramienta gratuita</p>
+      <p class="mono text-xs text-gray-400">Hecho con Go · un solo binario</p>
+    </div>
+  </footer>
+
+<script>
+  const form = document.getElementById('qr-form');
+  const preview = document.getElementById('preview');
+  const placeholder = document.getElementById('placeholder');
+  const status = document.getElementById('status');
+  const downloadBtn = document.getElementById('download-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  const fgColor = document.getElementById('fg');
+  const fgHex = document.getElementById('fg-hex');
+  const bgColor = document.getElementById('bg');
+  const bgHex = document.getElementById('bg-hex');
+
+  // sincronizar color picker <-> hex
+  function syncColor(picker, hex) {
+    picker.addEventListener('input', () => { hex.value = picker.value; schedule(); });
+    hex.addEventListener('input', () => {
+      if (/^#[0-9a-fA-F]{6}$/.test(hex.value)) { picker.value = hex.value; schedule(); }
+    });
+  }
+  syncColor(fgColor, fgHex);
+  syncColor(bgColor, bgHex);
+
+  let timer = null;
+  function schedule() { clearTimeout(timer); timer = setTimeout(generate, 300); }
+
+  ['data','size','level'].forEach(id => {
+    document.getElementById(id).addEventListener('input', schedule);
+    document.getElementById(id).addEventListener('change', schedule);
+  });
+  document.querySelectorAll('input[name="format"]').forEach(el => el.addEventListener('change', schedule));
+
+  function buildUrl() {
+    const data = document.getElementById('data').value.trim();
+    const size = document.getElementById('size').value;
+    const level = document.getElementById('level').value;
+    const format = document.querySelector('input[name="format"]:checked').value;
+    const fg = fgHex.value;
+    const bg = bgHex.value;
+    const params = new URLSearchParams({ data, size, fg, bg, level, format });
+    return '/api/qr?' + params.toString();
+  }
+
+  async function generate() {
+    const data = document.getElementById('data').value.trim();
+    if (!data) { status.textContent = ''; return; }
+    const url = buildUrl();
+    status.textContent = 'Generando…';
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      preview.src = objectUrl;
+      preview.classList.remove('hidden');
+      placeholder.classList.add('hidden');
+      downloadBtn.disabled = false;
+      copyBtn.disabled = false;
+      downloadBtn.dataset.url = url;
+      copyBtn.dataset.url = url + '&download=1';
+      status.textContent = 'Listo.';
+    } catch (e) {
+      status.textContent = 'Error: ' + e.message;
+    }
+  }
+
+  form.addEventListener('submit', (e) => { e.preventDefault(); generate(); });
+
+  downloadBtn.addEventListener('click', () => {
+    const url = downloadBtn.dataset.url + '&download=1';
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const url = new URL(copyBtn.dataset.url, window.location.origin).toString().replace('&download=1','');
+    try { await navigator.clipboard.writeText(url); status.textContent = 'Enlace copiado.'; }
+    catch { status.textContent = 'No se pudo copiar.'; }
+  });
+</script>
+</body>
+</html>
+EOF
+echo written
