@@ -168,7 +168,7 @@ func handleRegistro(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, "no se pudo crear la cuenta")
 		return
 	}
-	u, err := createUser(email, hash)
+	u, err := createUser(email, hash, "password", "")
 	if err != nil {
 		if errors.Is(err, ErrEmailTaken) {
 			writeErr(w, http.StatusConflict, "ese correo ya tiene cuenta")

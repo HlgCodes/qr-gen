@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
   .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -68,6 +69,15 @@
             Entrar
           </button>
         </div>
+
+        <div class="my-3 flex items-center gap-3">
+          <span class="h-px flex-1 bg-gray-200"></span>
+          <span class="mono text-[10px] uppercase tracking-wider text-gray-400">o</span>
+          <span class="h-px flex-1 bg-gray-200"></span>
+        </div>
+        <div id="google-btn" class="flex justify-center"></div>
+        <p id="a-status-google" class="mt-2 min-h-[1rem] text-center text-[11px] text-gray-500"></p>
+
         <p id="a-status" class="mt-3 min-h-[1rem] text-[11px] text-gray-500"></p>
       </div>
     </div>
@@ -309,7 +319,56 @@
     }
   }
 
+  async function initGoogle() {
+    let clientId = '';
+    try {
+      const res = await fetch('/api/config', { headers: { Accept: 'application/json' } });
+      const data = await res.json();
+      clientId = (data.googleClientId || '').trim();
+    } catch (e) { clientId = ''; }
+    const container = document.getElementById('google-btn');
+    if (!clientId || !container) {
+      if (container) container.classList.add('hidden');
+      return;
+    }
+    const tryInit = () => {
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        setTimeout(tryInit, 200);
+        return;
+      }
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCredential,
+        auto_select: false
+      });
+      window.google.accounts.id.renderButton(container, {
+        theme: 'outline', size: 'large', type: 'standard',
+        text: 'continue_with', shape: 'rectangular', width: 320
+      });
+    };
+    tryInit();
+  }
+
+  async function handleGoogleCredential(response) {
+    const status = document.getElementById('a-status-google') || document.getElementById('a-status');
+    if (status) status.textContent = 'Verificando tu cuenta de Google…';
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo iniciar sesión con Google');
+      if (status) status.textContent = '';
+      await loadMe();
+    } catch (e) {
+      if (status) status.textContent = e.message;
+    }
+  }
+
   loadMe();
+  initGoogle();
 </script>
 </body>
 </html>

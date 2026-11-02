@@ -36,8 +36,10 @@ func main() {
 	// cuenta
 	mux.HandleFunc("POST /api/auth/registro", rateLimit(handleRegistro, 10))
 	mux.HandleFunc("POST /api/auth/login", rateLimit(handleLogin, 10))
+	mux.HandleFunc("POST /api/auth/google", rateLimit(handleGoogleLogin, 10))
 	mux.HandleFunc("POST /api/auth/logout", handleLogout)
 	mux.HandleFunc("GET /api/auth/me", handleMe)
+	mux.HandleFunc("GET /api/config", handleConfig)
 
 	// codigos guardados
 	mux.HandleFunc("GET /api/codigos", handleListCodes)

@@ -25,6 +25,8 @@ type User struct {
 	ID        int64
 	Email     string
 	PassHash  string
+	Provider  string
+	GoogleSub string
 	CreatedAt int64
 }
 
@@ -64,45 +66,55 @@ func openStore(path string) error {
 }
 
 func migrate() error {
-	_, err := db.Exec(`
-CREATE TABLE IF NOT EXISTS users (
-	id         INTEGER PRIMARY KEY AUTOINCREMENT,
-	email      TEXT NOT NULL UNIQUE,
-	pass_hash  TEXT NOT NULL,
-	created_at INTEGER NOT NULL
-);
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
+		id         INTEGER PRIMARY KEY AUTOINCREMENT,
+		email      TEXT NOT NULL UNIQUE,
+		pass_hash  TEXT NOT NULL,
+		provider   TEXT NOT NULL DEFAULT 'password',
+		google_sub TEXT NOT NULL DEFAULT '',
+		created_at INTEGER NOT NULL
+	);
 
-CREATE TABLE IF NOT EXISTS sessions (
-	token_hash TEXT PRIMARY KEY,
-	user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	expires_at INTEGER NOT NULL
-);
+	CREATE TABLE IF NOT EXISTS sessions (
+		token_hash TEXT PRIMARY KEY,
+		user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		expires_at INTEGER NOT NULL
+	);
 
-CREATE TABLE IF NOT EXISTS codes (
-	id         INTEGER PRIMARY KEY AUTOINCREMENT,
-	user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	slug       TEXT NOT NULL UNIQUE,
-	kind       TEXT NOT NULL,
-	name       TEXT NOT NULL DEFAULT '',
-	data       TEXT NOT NULL,
-	design     TEXT NOT NULL DEFAULT '{}',
-	active     INTEGER NOT NULL DEFAULT 1,
-	scans      INTEGER NOT NULL DEFAULT 0,
-	created_at INTEGER NOT NULL,
-	updated_at INTEGER NOT NULL
-);
+	CREATE TABLE IF NOT EXISTS codes (
+		id         INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		slug       TEXT NOT NULL UNIQUE,
+		kind       TEXT NOT NULL,
+		name       TEXT NOT NULL DEFAULT '',
+		data       TEXT NOT NULL,
+		design     TEXT NOT NULL DEFAULT '{}',
+		active     INTEGER NOT NULL DEFAULT 1,
+		scans      INTEGER NOT NULL DEFAULT 0,
+		created_at INTEGER NOT NULL,
+		updated_at INTEGER NOT NULL
+	);
 
-CREATE INDEX IF NOT EXISTS idx_codes_user ON codes(user_id, created_at DESC);
-`)
-	return err
+	CREATE INDEX IF NOT EXISTS idx_codes_user ON codes(user_id, created_at DESC);`)
+	if err != nil {
+		return err
+	}
+	// migraciones suaves para instalaciones existentes
+	db.Exec(`ALTER TABLE users ADD COLUMN provider TEXT NOT NULL DEFAULT 'password'`)
+	db.Exec(`ALTER TABLE users ADD COLUMN google_sub TEXT NOT NULL DEFAULT ''`)
+	return nil
 }
+
 
 // ---------- usuarios ----------
 
-func createUser(email, passHash string) (*User, error) {
+func createUser(email, passHash, provider, googleSub string) (*User, error) {
+	if provider == "" {
+		provider = "password"
+	}
 	now := time.Now().Unix()
-	res, err := db.Exec(`INSERT INTO users (email, pass_hash, created_at) VALUES (?, ?, ?)`,
-		email, passHash, now)
+	res, err := db.Exec(`INSERT INTO users (email, pass_hash, provider, google_sub, created_at) VALUES (?, ?, ?, ?, ?)`,
+		email, passHash, provider, googleSub, now)
 	if err != nil {
 		if isUniqueErr(err) {
 			return nil, ErrEmailTaken
@@ -110,13 +122,25 @@ func createUser(email, passHash string) (*User, error) {
 		return nil, err
 	}
 	id, _ := res.LastInsertId()
-	return &User{ID: id, Email: email, PassHash: passHash, CreatedAt: now}, nil
+	return &User{ID: id, Email: email, PassHash: passHash, Provider: provider, GoogleSub: googleSub, CreatedAt: now}, nil
 }
 
 func userByEmail(email string) (*User, error) {
-	row := db.QueryRow(`SELECT id, email, pass_hash, created_at FROM users WHERE email = ?`, email)
+	row := db.QueryRow(`SELECT id, email, pass_hash, provider, google_sub, created_at FROM users WHERE email = ?`, email)
 	var u User
-	if err := row.Scan(&u.ID, &u.Email, &u.PassHash, &u.CreatedAt); err != nil {
+	if err := row.Scan(&u.ID, &u.Email, &u.PassHash, &u.Provider, &u.GoogleSub, &u.CreatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return &u, nil
+}
+
+func userByGoogleSub(sub string) (*User, error) {
+	row := db.QueryRow(`SELECT id, email, pass_hash, provider, google_sub, created_at FROM users WHERE google_sub = ?`, sub)
+	var u User
+	if err := row.Scan(&u.ID, &u.Email, &u.PassHash, &u.Provider, &u.GoogleSub, &u.CreatedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
@@ -126,9 +150,9 @@ func userByEmail(email string) (*User, error) {
 }
 
 func userByID(id int64) (*User, error) {
-	row := db.QueryRow(`SELECT id, email, pass_hash, created_at FROM users WHERE id = ?`, id)
+	row := db.QueryRow(`SELECT id, email, pass_hash, provider, google_sub, created_at FROM users WHERE id = ?`, id)
 	var u User
-	if err := row.Scan(&u.ID, &u.Email, &u.PassHash, &u.CreatedAt); err != nil {
+	if err := row.Scan(&u.ID, &u.Email, &u.PassHash, &u.Provider, &u.GoogleSub, &u.CreatedAt); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
