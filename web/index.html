@@ -460,33 +460,26 @@
 
       <!-- ==================== VISTA PREVIA ==================== -->
       <aside class="h-fit lg:sticky lg:top-20">
-        <div class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-          <div class="mb-3 flex items-center justify-between">
-            <p class="text-[13px] font-semibold text-gray-900">Vista previa</p>
-            <span id="preview-badge" class="mono text-[10px] uppercase tracking-wider text-gray-400">Cómo se ve</span>
-          </div>
-
-          <div id="preview-media" class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 transition-all duration-300">
-            <img id="preview" alt="Vista previa del código QR" class="qr-preview hidden max-h-full max-w-full" />
-            <span id="placeholder" class="px-6 text-center text-xs leading-relaxed text-gray-400">Tu código aparece aquí mientras lo diseñas.</span>
-            <div id="phone-preview" class="absolute inset-0 hidden items-center justify-center p-4"></div>
-          </div>
-
-          <p id="preview-caption" class="mt-3 text-center text-[11px] text-gray-400">Así lo verá quien lo escanee.</p>
-
-          <div class="mt-4 flex flex-col gap-2 sm:flex-row">
-            <button type="button" id="download-btn" disabled
-              class="tap inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-30">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
-              Descargar
-            </button>
-            <button type="button" id="copy-btn" disabled
-              class="tap inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30">
-              Copiar enlace
-            </button>
-          </div>
-          <p id="status" class="mt-2 min-h-[1rem] text-center text-[11px] text-gray-400"></p>
+        <div id="preview-media" class="relative flex aspect-[9/16] w-full items-center justify-center transition-all duration-300">
+          <img id="preview" alt="Vista previa del código QR" class="qr-preview hidden max-h-full max-w-full rounded-2xl shadow-lg ring-1 ring-gray-200" />
+          <span id="placeholder" class="px-6 text-center text-xs leading-relaxed text-gray-400">Tu código aparece aquí mientras lo diseñas.</span>
+          <div id="phone-preview" class="absolute inset-0 hidden items-center justify-center"></div>
         </div>
+
+        <p id="preview-caption" class="mt-3 text-center text-[11px] text-gray-400">Así lo verá quien lo escanee.</p>
+
+        <div id="preview-actions" class="mt-4 hidden flex-col gap-2 sm:flex-row">
+          <button type="button" id="download-btn" disabled
+            class="tap inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-30">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+            Descargar
+          </button>
+          <button type="button" id="copy-btn" disabled
+            class="tap inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30">
+            Copiar enlace
+          </button>
+        </div>
+        <p id="status" class="mt-2 min-h-[1rem] text-center text-[11px] text-gray-400"></p>
       </aside>
 
     </div>
@@ -504,7 +497,6 @@
   const status = document.getElementById('status');
   const downloadBtn = document.getElementById('download-btn');
   const copyBtn = document.getElementById('copy-btn');
-  const previewBadge = document.getElementById('preview-badge');
   const fgColor = document.getElementById('fg');
   const fgHex = document.getElementById('fg-hex');
   const bgColor = document.getElementById('bg');
@@ -611,6 +603,7 @@
   const phonePreview = document.getElementById('phone-preview');
   const previewMedia = document.getElementById('preview-media');
   const previewCaption = document.getElementById('preview-caption');
+  const previewActions = document.getElementById('preview-actions');
   const hasHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
   let hoveringMode = null;
 
@@ -811,12 +804,9 @@
       if (placeholder) placeholder.classList.add('hidden');
     }
 
-    if (previewBadge) {
-      const fmtEl = document.getElementById('format');
-      const sizeEl = document.getElementById('size');
-      previewBadge.textContent = qrStep
-        ? String((fmtEl || {}).value || 'png').toUpperCase() + ' · ' + String((sizeEl || {}).value || '512')
-        : 'Así se ve';
+    if (previewActions) {
+      previewActions.classList.toggle('hidden', !qrStep);
+      previewActions.classList.toggle('flex', qrStep);
     }
     if (previewCaption) {
       previewCaption.textContent = qrStep
@@ -1012,7 +1002,6 @@
   async function generate() {
     const params = buildParams();
     if (!params.data) { status.textContent = ''; return; }
-    if (previewBadge) previewBadge.textContent = params.format.toUpperCase() + ' · ' + params.size;
     status.textContent = 'Generando…';
     try {
       const res = await fetch('/api/qr', {
