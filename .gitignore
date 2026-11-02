@@ -1,0 +1,17 @@
+# Binarios y artefactos de build
+qr-gen
+*.exe
+*.test
+*.out
+
+# Go
+vendor/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+EOF
