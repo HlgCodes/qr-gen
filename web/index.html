@@ -67,22 +67,85 @@
         <!-- Paso 1: Tipo de código -->
         <div data-step="1" class="space-y-4">
           <div>
-            <p class="text-sm font-semibold text-gray-900 mb-2">¿Qué quieres compartir?</p>
-            <div id="modes" class="flex flex-wrap gap-2">
-              <button type="button" data-mode="text" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Texto / URL</button>
-              <button type="button" data-mode="whatsapp" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">WhatsApp</button>
-              <button type="button" data-mode="wifi" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">WiFi</button>
-              <button type="button" data-mode="vcard" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Contacto</button>
-              <button type="button" data-mode="email" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Email</button>
-              <button type="button" data-mode="tel" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Teléfono</button>
-              <button type="button" data-mode="sms" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">SMS</button>
-              <button type="button" data-mode="geo" class="chip mode-btn rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700">Ubicación</button>
+            <p class="text-sm font-semibold text-gray-900 mb-1">¿Qué quieres compartir?</p>
+            <p class="text-xs text-gray-500 mb-4">Elige un tipo y continúa al siguiente paso.</p>
+            <div id="modes" class="grid grid-cols-2 gap-3">
+              <button type="button" data-mode="text" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">🔗</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Texto o URL</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Cualquier texto o enlace web</p>
+                  </div>
+                </div>
+              </button>
+              <button type="button" data-mode="whatsapp" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">💬</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">WhatsApp</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Abre un chat con mensaje</p>
+                  </div>
+                </div>
+              </button>
+              <button type="button" data-mode="wifi" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">📶</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">WiFi</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Conecta a una red</p>
+                  </div>
+                </div>
+              </button>
+              <button type="button" data-mode="vcard" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">👤</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Contacto</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Guarda un contacto</p>
+                  </div>
+                </div>
+              </button>
+              <button type="button" data-mode="email" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">✉️</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Email</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Envía un correo</p>
+                  </div>
+                </div>
+              </button>
+              <button type="button" data-mode="tel" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">📞</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Teléfono</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Llama a un número</p>
+                  </div>
+                </div>
+              </button>
+              <button type="button" data-mode="sms" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">💬</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">SMS</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Envía un mensaje de texto</p>
+                  </div>
+                </div>
+              </button>
+              <button type="button" data-mode="geo" class="mode-btn group rounded-2xl border border-gray-200 bg-white p-4 text-left hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">📍</span>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Ubicación</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Abre un lugar en el mapa</p>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
-          <div class="flex justify-end pt-2">
-            <button type="button" id="btn-next-1" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 tap">Siguiente →</button>
-          </div>
         </div>
+
 
         <!-- Paso 2: Contenido -->
         <div data-step="2" class="hidden space-y-4">
@@ -459,18 +522,17 @@
     currentMode = mode;
     modeBtns.forEach(btn => {
       const active = btn.dataset.mode === mode;
-      btn.classList.toggle('bg-blue-600', active);
-      btn.classList.toggle('text-white', active);
-      btn.classList.toggle('border-blue-600', active);
-      btn.classList.toggle('bg-gray-50', !active);
-      btn.classList.toggle('text-gray-700', !active);
+      btn.classList.toggle('border-blue-500', active);
+      btn.classList.toggle('bg-blue-50', active);
       btn.classList.toggle('border-gray-200', !active);
+      btn.classList.toggle('bg-white', !active);
+      btn.classList.toggle('shadow-sm', active);
     });
     panels.forEach(p => p.classList.toggle('hidden', p.dataset.panel !== mode));
     computeData();
     schedule();
   }
-  modeBtns.forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+  modeBtns.forEach(btn => btn.addEventListener('click', () => { setMode(btn.dataset.mode); showStep(2); }));
 
   function computeData() {
     let d = '';
