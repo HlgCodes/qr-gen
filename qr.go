@@ -492,31 +492,31 @@ func inRoundedRect(px, py, w, h, r int) bool {
 }
 
 func drawRectBorder(img *image.RGBA, x, y, w, h, radius, thickness int, c color.Color) {
-	// borde exterior
-	for i := 0; i < thickness; i++ {
-		// top
+	if thickness < 1 {
+		thickness = 1
+	}
+	if radius > w/2 {
+		radius = w / 2
+	}
+	if radius > h/2 {
+		radius = h / 2
+	}
+	// rellena la diferencia entre el rectangulo redondeado exterior y el
+	// interior (encogido `thickness` px): eso deja un anillo continuo.
+	iw, ih := w-2*thickness, h-2*thickness
+	ir := radius - thickness
+	if ir < 0 {
+		ir = 0
+	}
+	for dy := 0; dy < h; dy++ {
 		for dx := 0; dx < w; dx++ {
-			if inRoundedRect(dx, i, w, h, radius) && !inRoundedRect(dx, i+1, w, h, radius-thickness+1) {
-				img.Set(x+dx, y+i, c)
+			if !inRoundedRect(dx, dy, w, h, radius) {
+				continue
 			}
-		}
-		// bottom
-		for dx := 0; dx < w; dx++ {
-			if inRoundedRect(dx, h-1-i, w, h, radius) && !inRoundedRect(dx, h-2-i, w, h, radius-thickness+1) {
-				img.Set(x+dx, y+h-1-i, c)
+			if iw > 0 && ih > 0 && inRoundedRect(dx-thickness, dy-thickness, iw, ih, ir) {
+				continue
 			}
-		}
-		// left
-		for dy := 0; dy < h; dy++ {
-			if inRoundedRect(i, dy, w, h, radius) && !inRoundedRect(i+1, dy, w, h, radius-thickness+1) {
-				img.Set(x+i, y+dy, c)
-			}
-		}
-		// right
-		for dy := 0; dy < h; dy++ {
-			if inRoundedRect(w-1-i, dy, w, h, radius) && !inRoundedRect(w-2-i, dy, w, h, radius-thickness+1) {
-				img.Set(x+w-1-i, y+dy, c)
-			}
+			img.Set(x+dx, y+dy, c)
 		}
 	}
 }

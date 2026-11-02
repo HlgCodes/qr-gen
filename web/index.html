@@ -463,16 +463,16 @@
         <div class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
           <div class="mb-3 flex items-center justify-between">
             <p class="text-[13px] font-semibold text-gray-900">Vista previa</p>
-            <span id="preview-badge" class="mono text-[10px] uppercase tracking-wider text-gray-400">PNG · 512</span>
+            <span id="preview-badge" class="mono text-[10px] uppercase tracking-wider text-gray-400">Cómo se ve</span>
           </div>
 
-          <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
+          <div id="preview-media" class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 transition-all duration-300">
             <img id="preview" alt="Vista previa del código QR" class="qr-preview hidden max-h-full max-w-full" />
             <span id="placeholder" class="px-6 text-center text-xs leading-relaxed text-gray-400">Tu código aparece aquí mientras lo diseñas.</span>
-            <div id="context-preview" class="absolute inset-0 hidden items-center justify-center p-3"></div>
+            <div id="phone-preview" class="absolute inset-0 hidden items-center justify-center p-4"></div>
           </div>
 
-          <p class="mt-3 text-center text-[11px] text-gray-400">Escanéalo con la cámara del teléfono para probarlo.</p>
+          <p id="preview-caption" class="mt-3 text-center text-[11px] text-gray-400">Así lo verá quien lo escanee.</p>
 
           <div class="mt-4 flex flex-col gap-2 sm:flex-row">
             <button type="button" id="download-btn" disabled
@@ -568,7 +568,7 @@
       el.querySelector('span:last-child').classList.toggle('text-gray-900', s === n);
       el.querySelector('span:last-child').classList.toggle('text-gray-400', s !== n);
     });
-    if (typeof hideContextPreview === 'function') hideContextPreview();
+    if (typeof renderPreview === 'function') renderPreview();
   }
   document.querySelectorAll('[data-goto]').forEach(btn => {
     btn.addEventListener('click', () => showStep(parseInt(btn.dataset.goto, 10)));
@@ -602,129 +602,240 @@
     if (t) t.textContent = info[0];
     if (s) s.textContent = info[1];
     computeData();
+    if (typeof renderPreview === 'function') renderPreview();
     schedule();
   }
   modeBtns.forEach(btn => btn.addEventListener('click', () => { setMode(btn.dataset.mode); showStep(2); }));
 
-  // --- Mockup contextual al pasar el mouse por un tipo ---
-  const contextPreview = document.getElementById('context-preview');
+  // --- Vista previa: movil con el contenido (pasos 1-2) y QR real (paso 3) ---
+  const phonePreview = document.getElementById('phone-preview');
+  const previewMedia = document.getElementById('preview-media');
+  const previewCaption = document.getElementById('preview-caption');
   const hasHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+  let hoveringMode = null;
 
-  function phone(inner) {
-    return '<div class="flex h-full w-full items-center justify-center">' +
-      '<div class="relative h-full w-full max-w-[230px] overflow-hidden rounded-[20px] ring-[6px] ring-gray-900 shadow-xl">' + inner + '</div></div>';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function val(id) {
+    const el = document.getElementById(id);
+    return el ? String(el.value).trim() : '';
+  }
+  function iniciales(t) {
+    const s = String(t == null ? '' : t);
+    const letras = s.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ ]/g, ' ').trim().split(/\s+/).filter(Boolean);
+    if (letras.length) {
+      return ((letras[0] || '').charAt(0) + (letras[1] ? letras[1].charAt(0) : '')).toUpperCase();
+    }
+    const digitos = s.replace(/\D/g, '');
+    return digitos ? digitos.slice(-2) : '?';
   }
 
-  function mockupHTML(mode) {
+  const ICON = {
+    wifi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="h-10 w-10"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><path d="M12 20h.01"/></svg>',
+    phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="h-6 w-6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="h-5 w-5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" class="h-7 w-7"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'
+  };
+
+  function phoneShell(inner) {
+    return '<div class="flex h-full max-h-full items-center justify-center">' +
+      '<div class="relative flex h-full max-h-[520px] flex-col overflow-hidden rounded-[28px] border-[3px] border-gray-900 bg-white shadow-xl" style="aspect-ratio:9/19">' +
+        '<div class="pointer-events-none absolute left-1/2 top-1.5 z-20 h-3.5 w-16 -translate-x-1/2 rounded-full bg-gray-900"></div>' +
+        '<div class="flex items-center justify-between px-4 pb-1 pt-1.5 text-[9px] font-semibold text-gray-900">' +
+          '<span>9:41</span>' +
+          '<span class="flex items-center gap-1"><span class="text-[7px] tracking-tight">▮▮▮</span><span>100%</span></span>' +
+        '</div>' +
+        '<div class="relative flex min-h-0 flex-1 flex-col">' + inner + '</div>' +
+      '</div></div>';
+  }
+
+  function phoneMockup(mode) {
     switch (mode) {
-      case 'whatsapp':
-        return phone(
-          '<div class="flex h-full flex-col bg-[#ece5dd]">' +
-            '<div class="flex items-center gap-2 bg-[#075e54] px-3 py-2.5 text-white">' +
-              '<div class="h-6 w-6 rounded-full bg-white/25"></div>' +
-              '<div class="leading-tight"><p class="text-[11px] font-semibold">Contacto</p><p class="text-[9px] text-white/70">en línea</p></div>' +
+      case 'whatsapp': {
+        const cc = val('wa-cc') || '+57';
+        const num = val('wa-num') || '300 123 4567';
+        const msg = val('wa-msg') || 'Hola, quiero información';
+        return phoneShell(
+          '<div class="flex items-center gap-2 bg-[#075e54] px-3 py-2 text-white">' +
+            '<div class="grid h-7 w-7 flex-none place-items-center rounded-full bg-white/25 text-[10px] font-bold">' + esc(iniciales(num)) + '</div>' +
+            '<div class="min-w-0 leading-tight"><p class="truncate text-[10px] font-semibold">' + esc(cc + ' ' + num) + '</p><p class="text-[8px] text-white/70">en línea</p></div>' +
+          '</div>' +
+          '<div class="flex-1 space-y-2 overflow-hidden bg-[#ece5dd] p-2.5">' +
+            '<div class="ml-auto w-fit max-w-[88%] break-words rounded-lg rounded-tr-sm bg-[#dcf8c6] px-2.5 py-1.5 text-[10px] leading-snug text-gray-800 shadow-sm">' + esc(msg) + '</div>' +
+          '</div>' +
+          '<div class="flex items-center gap-1.5 bg-[#f0f0f0] p-1.5">' +
+            '<div class="flex-1 rounded-full bg-white px-3 py-1.5 text-[9px] text-gray-400">Escribe un mensaje</div>' +
+            '<div class="grid h-6 w-6 flex-none place-items-center rounded-full bg-[#25d366] text-[9px] text-white">➤</div>' +
+          '</div>');
+      }
+      case 'wifi': {
+        const ssid = val('wifi-ssid') || 'MiRed';
+        const secEl = document.getElementById('wifi-sec');
+        const secTxt = secEl ? secEl.options[secEl.selectedIndex].text : 'WPA / WPA2';
+        const pass = val('wifi-pass');
+        return phoneShell(
+          '<div class="flex flex-1 flex-col items-center justify-center gap-2 bg-gradient-to-b from-sky-50 to-white px-4 text-center">' +
+            '<div class="text-sky-500">' + ICON.wifi + '</div>' +
+            '<p class="max-w-full truncate text-[12px] font-semibold text-gray-900">' + esc(ssid) + '</p>' +
+            '<p class="text-[8px] text-gray-500">' + esc(secTxt) + '</p>' +
+            (pass
+              ? '<p class="font-mono text-[9px] tracking-widest text-gray-400">' + esc('•'.repeat(Math.min(pass.length, 14))) + '</p>'
+              : '<p class="text-[9px] text-gray-400">Red abierta</p>') +
+            '<div class="mt-2 w-full rounded-full bg-blue-600 py-1.5 text-[10px] font-semibold text-white">Conectar</div>' +
+            '<p class="text-[8px] leading-snug text-gray-400">Se une a la red sin escribir la clave</p>' +
+          '</div>');
+      }
+      case 'vcard': {
+        const nombre = val('vc-name') || 'Juan Pérez';
+        const tel = val('vc-phone') || '+57 300 123 4567';
+        const mail = val('vc-email') || 'juan@ejemplo.com';
+        const org = val('vc-org');
+        const cargo = val('vc-title');
+        return phoneShell(
+          '<div class="flex flex-1 flex-col gap-3 bg-white p-4">' +
+            '<p class="text-[9px] font-semibold uppercase tracking-wider text-gray-400">Contacto nuevo</p>' +
+            '<div class="flex flex-col items-center gap-1.5 text-center">' +
+              '<div class="grid h-14 w-14 place-items-center rounded-full bg-violet-100 text-[16px] font-bold text-violet-600">' + esc(iniciales(nombre)) + '</div>' +
+              '<p class="max-w-full truncate text-[12px] font-semibold text-gray-900">' + esc(nombre) + '</p>' +
+              '<p class="max-w-full truncate text-[9px] text-gray-500">' + esc([cargo, org].filter(Boolean).join(' · ') || 'Sin empresa') + '</p>' +
             '</div>' +
-            '<div class="flex-1 space-y-2 p-3">' +
-              '<div class="ml-auto w-fit max-w-[85%] rounded-lg rounded-tr-sm bg-[#dcf8c6] px-2.5 py-1.5 text-[11px] text-gray-800 shadow-sm">Hola, quiero información</div>' +
+            '<div class="space-y-1 rounded-xl bg-gray-50 p-2 text-[9px] text-gray-600">' +
+              '<p class="truncate">' + esc(tel) + '</p>' +
+              '<p class="truncate">' + esc(mail) + '</p>' +
             '</div>' +
-            '<div class="flex items-center gap-1.5 bg-[#f0f0f0] p-2">' +
-              '<div class="flex-1 rounded-full bg-white px-3 py-1.5 text-[10px] text-gray-400">Escribe un mensaje</div>' +
-              '<div class="grid h-7 w-7 place-items-center rounded-full bg-[#25d366] text-[10px] text-white">&#10148;</div>' +
+            '<div class="mt-auto rounded-full bg-blue-600 py-1.5 text-center text-[10px] font-semibold text-white">Guardar contacto</div>' +
+          '</div>');
+      }
+      case 'email': {
+        const to = val('em-to') || 'contacto@ejemplo.com';
+        const asunto = val('em-subject') || 'Consulta';
+        const cuerpo = val('em-body') || 'Hola, quisiera información…';
+        return phoneShell(
+          '<div class="flex items-center justify-between border-b border-gray-100 px-3 py-2 text-[10px]">' +
+            '<span class="text-gray-400">Cancelar</span><span class="font-semibold text-gray-900">Nuevo mensaje</span><span class="font-semibold text-blue-600">Enviar</span>' +
+          '</div>' +
+          '<div class="space-y-1.5 px-3 py-2 text-[9px]">' +
+            '<div class="flex gap-2 border-b border-gray-100 pb-1.5"><span class="w-10 flex-none text-gray-400">Para</span><span class="min-w-0 truncate text-gray-800">' + esc(to) + '</span></div>' +
+            '<div class="flex gap-2 border-b border-gray-100 pb-1.5"><span class="w-10 flex-none text-gray-400">Asunto</span><span class="min-w-0 truncate text-gray-800">' + esc(asunto) + '</span></div>' +
+          '</div>' +
+          '<div class="flex-1 overflow-hidden px-3 py-1 text-[10px] leading-snug text-gray-600">' + esc(cuerpo) + '</div>' +
+          '<div class="px-3 pb-2"><div class="rounded-full bg-blue-600 py-1.5 text-center text-[10px] font-semibold text-white">Enviar correo</div></div>');
+      }
+      case 'tel': {
+        const num = val('tel-num') || '+57 300 123 4567';
+        return phoneShell(
+          '<div class="flex flex-1 flex-col items-center justify-center gap-2 bg-white px-4 text-center">' +
+            '<p class="text-[9px] text-gray-400">Llamar a</p>' +
+            '<p class="max-w-full truncate text-[15px] font-semibold tracking-tight text-gray-900">' + esc(num) + '</p>' +
+            '<div class="mt-3 grid h-12 w-12 place-items-center rounded-full bg-emerald-500 text-white shadow-lg">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
             '</div>' +
+            '<p class="text-[8px] text-gray-400">Toca para llamar</p>' +
           '</div>');
-      case 'wifi':
-        return phone(
-          '<div class="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-b from-sky-50 to-white p-4">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="h-12 w-12 text-sky-500"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><path d="M12 20h.01"/></svg>' +
-            '<p class="text-[13px] font-semibold text-gray-900">MiRed</p>' +
-            '<p class="-mt-2 text-[10px] text-gray-500">WPA2 · con contraseña</p>' +
-            '<div class="mt-1 h-1.5 w-2/3 overflow-hidden rounded-full bg-gray-200"><div class="h-full w-2/3 rounded-full bg-sky-500"></div></div>' +
-            '<p class="text-[10px] font-medium text-sky-600">Conectando…</p>' +
-          '</div>');
-      case 'vcard':
-        return phone(
-          '<div class="flex h-full flex-col gap-3 bg-white p-4">' +
-            '<div class="flex items-center gap-2.5">' +
-              '<div class="grid h-11 w-11 place-items-center rounded-full bg-violet-100 text-[13px] font-bold text-violet-600">JP</div>' +
-              '<div class="leading-tight"><p class="text-[12px] font-semibold text-gray-900">Juan Pérez</p><p class="text-[10px] text-gray-500">Director · Mi Empresa</p></div>' +
-            '</div>' +
-            '<div class="space-y-1 text-[10px] text-gray-600"><p>+57 300 123 4567</p><p>juan@ejemplo.com</p></div>' +
-            '<div class="mt-auto rounded-full bg-blue-600 py-2 text-center text-[10px] font-semibold text-white">Guardar contacto</div>' +
-          '</div>');
-      case 'email':
-        return phone(
-          '<div class="flex h-full flex-col gap-2 bg-white p-4 text-[10px]">' +
-            '<p class="text-[11px] font-semibold text-gray-900">Nuevo mensaje</p>' +
-            '<div class="flex gap-2 border-b border-gray-100 pb-1.5"><span class="text-gray-400">Para</span><span class="truncate text-gray-800">contacto@ejemplo.com</span></div>' +
-            '<div class="flex gap-2 border-b border-gray-100 pb-1.5"><span class="text-gray-400">Asunto</span><span class="text-gray-800">Consulta</span></div>' +
-            '<div class="flex-1 pt-1 text-gray-600">Hola, quisiera información…</div>' +
-            '<div class="self-end rounded-full bg-blue-600 px-4 py-1.5 text-[10px] font-semibold text-white">Enviar</div>' +
-          '</div>');
-      case 'tel':
-        return phone(
-          '<div class="flex h-full flex-col items-center justify-center gap-2 bg-white p-4">' +
-            '<div class="grid h-12 w-12 place-items-center rounded-full bg-teal-50 text-teal-600">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="h-6 w-6"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
-            '</div>' +
-            '<p class="text-[15px] font-semibold tracking-tight text-gray-900">+57 300 123 4567</p>' +
-            '<p class="text-[10px] text-gray-500">Toca el número para llamar</p>' +
-            '<div class="mt-2 rounded-full bg-emerald-500 px-5 py-2 text-[11px] font-semibold text-white">Llamar</div>' +
-          '</div>');
-      case 'sms':
-        return phone(
-          '<div class="flex h-full flex-col bg-[#f2f2f2]">' +
-            '<div class="flex items-center gap-2 bg-gray-800 px-3 py-2.5 text-white"><div class="h-6 w-6 rounded-full bg-white/25"></div><p class="text-[11px] font-semibold">SMS</p></div>' +
-            '<div class="flex-1 space-y-2 p-3"><div class="ml-auto w-fit max-w-[85%] rounded-lg rounded-tr-sm bg-white px-2.5 py-1.5 text-[11px] text-gray-800 shadow-sm">Tu mensaje aquí</div></div>' +
-            '<div class="bg-white p-2"><div class="rounded-full bg-gray-100 px-3 py-1.5 text-[10px] text-gray-400">Escribe un SMS…</div></div>' +
-          '</div>');
-      case 'geo':
-        return phone(
-          '<div class="relative flex h-full items-center justify-center bg-[#e8f0e4]">' +
-            '<div class="absolute inset-0 opacity-60" style="background-image:linear-gradient(#cfe0c9 1px,transparent 1px),linear-gradient(90deg,#cfe0c9 1px,transparent 1px);background-size:26px 26px"></div>' +
+      }
+      case 'sms': {
+        const num = val('sms-num') || '+57 300 123 4567';
+        const body = val('sms-body') || 'Tu mensaje aquí';
+        return phoneShell(
+          '<div class="flex items-center gap-2 bg-gray-800 px-3 py-2 text-white">' +
+            '<div class="grid h-7 w-7 flex-none place-items-center rounded-full bg-white/25 text-[10px] font-bold">' + esc(iniciales(num)) + '</div>' +
+            '<p class="truncate text-[10px] font-semibold">' + esc(num) + '</p>' +
+          '</div>' +
+          '<div class="flex-1 space-y-2 overflow-hidden bg-[#f2f2f2] p-2.5">' +
+            '<div class="ml-auto w-fit max-w-[88%] break-words rounded-lg rounded-tr-sm bg-white px-2.5 py-1.5 text-[10px] leading-snug text-gray-800 shadow-sm">' + esc(body) + '</div>' +
+          '</div>' +
+          '<div class="bg-white p-1.5"><div class="rounded-full bg-gray-100 px-3 py-1.5 text-[9px] text-gray-400">Escribe un SMS…</div></div>');
+      }
+      case 'geo': {
+        const lat = val('geo-lat') || '4.7110';
+        const lng = val('geo-lng') || '-74.0721';
+        return phoneShell(
+          '<div class="relative flex flex-1 items-center justify-center bg-[#e8f0e4]">' +
+            '<div class="absolute inset-0 opacity-70" style="background-image:linear-gradient(#cfe0c9 1px,transparent 1px),linear-gradient(90deg,#cfe0c9 1px,transparent 1px);background-size:24px 24px"></div>' +
             '<div class="relative flex flex-col items-center gap-1">' +
-              '<div class="grid h-10 w-10 place-items-center rounded-full bg-orange-500 text-white shadow-lg">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-              '</div>' +
-              '<p class="mt-1 rounded bg-white/90 px-2 py-1 text-[10px] font-semibold text-gray-900">4.7110, -74.0721</p>' +
-              '<p class="text-[9px] text-gray-600">Bogotá, Colombia</p>' +
+              '<div class="grid h-9 w-9 place-items-center rounded-full bg-orange-500 text-white shadow-lg">' + ICON.pin + '</div>' +
+              '<p class="mt-1 rounded bg-white/90 px-2 py-1 font-mono text-[9px] font-semibold text-gray-900">' + esc(lat) + ', ' + esc(lng) + '</p>' +
+              '<p class="text-[8px] text-gray-600">Abrir en el mapa</p>' +
             '</div>' +
           '</div>');
-      default:
-        return phone(
-          '<div class="flex h-full flex-col gap-3 bg-white p-4">' +
-            '<div class="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="h-3.5 w-3.5 text-gray-400"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' +
-              '<span class="truncate text-[10px] text-gray-700">https://www.hlgcodes.com</span>' +
+      }
+      default: {
+        const url = val('data-text') || 'https://www.hlgcodes.com';
+        return phoneShell(
+          '<div class="flex items-center gap-2 border-b border-gray-100 px-2.5 py-2 text-[9px]">' +
+            '<span class="flex-none rounded-md bg-gray-100 px-1.5 py-1 text-gray-500">‹</span>' +
+            '<div class="flex min-w-0 flex-1 items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1.5">' +
+              '<span class="flex-none text-gray-400">' + ICON.link.replace('h-5 w-5', 'h-3 w-3') + '</span>' +
+              '<span class="min-w-0 truncate text-gray-700">' + esc(url) + '</span>' +
             '</div>' +
-            '<div class="flex flex-1 flex-col items-center justify-center gap-2 text-center">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" class="h-9 w-9 text-gray-300"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' +
-              '<p class="text-[10px] leading-snug text-gray-500">Al escanear se abre este enlace</p>' +
-            '</div>' +
+          '</div>' +
+          '<div class="flex flex-1 flex-col items-center justify-center gap-2 px-5 text-center">' +
+            '<div class="text-blue-500">' + ICON.globe + '</div>' +
+            '<p class="text-[11px] font-semibold text-gray-900">Se abre el enlace</p>' +
+            '<p class="text-[9px] leading-snug text-gray-500">Al escanear, el teléfono carga esta dirección en el navegador.</p>' +
           '</div>');
+      }
     }
   }
 
-  function showContextPreview(mode) {
-    if (!contextPreview) return;
-    contextPreview.innerHTML = mockupHTML(mode || 'text');
-    contextPreview.classList.remove('hidden');
-    contextPreview.classList.add('flex');
-    if (preview) preview.classList.add('hidden');
-    if (placeholder) placeholder.classList.add('hidden');
-  }
-  function hideContextPreview() {
-    if (!contextPreview || contextPreview.classList.contains('hidden')) return;
-    contextPreview.classList.add('hidden');
-    contextPreview.classList.remove('flex');
-    contextPreview.innerHTML = '';
-    if (preview && preview.getAttribute('src')) preview.classList.remove('hidden');
-    else if (placeholder) placeholder.classList.remove('hidden');
+  function renderPreview() {
+    const qrStep = currentStep >= 3;
+
+    if (phonePreview) {
+      if (qrStep) {
+        phonePreview.classList.add('hidden');
+        phonePreview.classList.remove('flex');
+        phonePreview.innerHTML = '';
+      } else {
+        phonePreview.innerHTML = phoneMockup(hoveringMode || currentMode);
+        phonePreview.classList.remove('hidden');
+        phonePreview.classList.add('flex');
+      }
+    }
+    if (previewMedia) previewMedia.style.aspectRatio = qrStep ? '1 / 1' : '9 / 16';
+
+    if (qrStep) {
+      if (preview && preview.getAttribute('src') && preview.getAttribute('src') !== '') {
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+      } else {
+        preview.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+      }
+    } else {
+      if (preview) preview.classList.add('hidden');
+      if (placeholder) placeholder.classList.add('hidden');
+    }
+
+    if (previewBadge) {
+      const fmtEl = document.getElementById('format');
+      const sizeEl = document.getElementById('size');
+      previewBadge.textContent = qrStep
+        ? String((fmtEl || {}).value || 'png').toUpperCase() + ' · ' + String((sizeEl || {}).value || '512')
+        : 'Así se ve';
+    }
+    if (previewCaption) {
+      previewCaption.textContent = qrStep
+        ? 'Escanéalo con la cámara del teléfono para probarlo.'
+        : 'Así lo verá quien lo escanee.';
+    }
   }
 
   if (hasHover) {
     modeBtns.forEach(btn => {
-      btn.addEventListener('mouseenter', () => showContextPreview(btn.dataset.mode));
-      btn.addEventListener('mouseleave', hideContextPreview);
+      btn.addEventListener('mouseenter', () => {
+        if (currentStep >= 3) return;
+        hoveringMode = btn.dataset.mode;
+        renderPreview();
+      });
+      btn.addEventListener('mouseleave', () => {
+        hoveringMode = null;
+        renderPreview();
+      });
     });
   }
 
@@ -805,11 +916,11 @@
   }
 
   document.querySelectorAll('.mode-panel input, .mode-panel textarea, .mode-panel select').forEach(el => {
-    el.addEventListener('input', () => { computeData(); schedule(); });
-    el.addEventListener('change', () => { computeData(); schedule(); });
+    el.addEventListener('input', () => { computeData(); renderPreview(); schedule(); });
+    el.addEventListener('change', () => { computeData(); renderPreview(); schedule(); });
   });
   const dataText = document.getElementById('data-text');
-  if (dataText) dataText.addEventListener('input', () => { computeData(); schedule(); });
+  if (dataText) dataText.addEventListener('input', () => { computeData(); renderPreview(); schedule(); });
 
   let logoBase64 = null;
   const logoInput = document.getElementById('logo');
@@ -913,12 +1024,11 @@
       const blob = await res.blob();
       const objectUrl = URL.createObjectURL(blob);
       preview.src = objectUrl;
-      if (!contextPreview || contextPreview.classList.contains('hidden')) preview.classList.remove('hidden');
-      placeholder.classList.add('hidden');
       downloadBtn.disabled = false;
       copyBtn.disabled = false;
       copyBtn.dataset.url = buildGetUrl();
       status.textContent = 'Listo.';
+      renderPreview();
     } catch (e) {
       status.textContent = 'Error: ' + e.message;
     }
